@@ -44,6 +44,7 @@ JFrameBufferObject* deferredFBO = NULL;
 
 JMesh *screenDiffuse = NULL;
 JMesh *screenPosition = NULL;
+JMesh *screenNormal = NULL;
 
 JCamera* screenCamera;
 JLevel *screenLevel = NULL;
@@ -53,7 +54,7 @@ JLevel *screenLevel = NULL;
 
 int initFBO()
 {
-	deferredFBO = JFBOManager::Inst()->makeCanvasWithAttribute(JFBO_BRUSHES::BRUSH_TEX1 | JFBO_BRUSHES::BRUSH_POSITION,JScreenWidth,JScreenHeight);
+	deferredFBO = JFBOManager::Inst()->makeCanvasWithAttribute( JFBO_BRUSHES::BRUSH_DEPTH | JFBO_BRUSHES::BRUSH_TEX1 | JFBO_BRUSHES::BRUSH_POSITION | JFBO_BRUSHES::BRUSH_NORMAL,JScreenWidth,JScreenHeight);
 	return 0;
 }
 
@@ -91,11 +92,9 @@ int initObjects()
 {
 	obj1 = new JMesh();
 
-	unsigned int smoothness1 = 1;
-	float radius1 = 1;
 
-	unsigned int smoothness2 = 3;
-	float radius2 = 1;
+	unsigned int smoothness2 = 7;
+	float radius2 = 3.8;
 	JVector3 tmpNormal;
 	tmpNormal[0] = 0;
 	tmpNormal[1] = 0;
@@ -157,6 +156,26 @@ int initObjects()
 
 	screenPosition->setMaterial( screenPositionMat );
 
+
+	screenNormal = new JMesh();
+
+	if( makePlane(JScreenWidth/2, JScreenHeight/2, 1, 1, tmpNormal, *screenNormal, false ) != 0 )
+	{
+		return -1;
+	}
+	screenNormal->position[0] = -JScreenWidth/4;
+	screenNormal->position[1] = -JScreenHeight/4;
+	if( screenNormal->refreshVBO() != 0 )
+		return -1;
+
+	JMaterial* screenNormalMat = new JMaterial();
+	screenNormalMat->shaderinfo = shaderTexUnlit;
+	screenNormalMat->texObj = deferredFBO->getTextureObjectOfCanvas( BRUSH_NORMAL );
+	if(screenNormalMat->texObj == NULL)
+		return -1;
+
+	screenNormal->setMaterial( screenNormalMat );
+
 	return 0;
 }
 int initCameras()
@@ -177,10 +196,10 @@ int initCameras()
 
 	worldCamera = new JCameraPerspective();
 	worldCamera->setTargetFBO( deferredFBO );
-	worldCamera->setTransform( pos, up, at ,JScreenWidth, JScreenHeight, 1.f, 500 );
+	worldCamera->setTransform( pos, up, at ,JScreenWidth, JScreenHeight, 1.f, 100 );
 	
 	screenCamera = new JCameraOrtho();
-	screenCamera->setTransform( pos, up, at ,JScreenWidth, JScreenHeight, 1.f, 500 );
+	screenCamera->setTransform( pos, up, at ,JScreenWidth, JScreenHeight, 1.f, 100 );
 	
 	return 0;
 }
@@ -209,6 +228,7 @@ int init()
 	screenLevel = new JLevel();
 	screenLevel->pushMesh( screenDiffuse );
 	screenLevel->pushMesh( screenPosition );
+	screenLevel->pushMesh( screenNormal );
 	screenLevel->pushCamera( screenCamera );
 	
 	return 0;
@@ -216,15 +236,16 @@ int init()
 
 int draw()
 {
-	glClearColor( 0.5,0.5,0,1);
+	glClearColor( 0.5,0.5,0.5,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	worldLevel->draw();
-/*
 
-	glClearColor( 0,0,1,1);
+
+	glClearColor( 0,1,1,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	screenLevel->draw();
-*/
+
+/*
 
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER,0);
 
@@ -238,6 +259,7 @@ int draw()
 
 	glReadBuffer(GL_COLOR_ATTACHMENT1);
 	glBlitFramebuffer(0,0,JScreenWidth,JScreenHeight,JScreenWidth/2,0,JScreenWidth,JScreenHeight/2,GL_COLOR_BUFFER_BIT,GL_LINEAR);
+*/
 
 
 	return 0;
@@ -275,7 +297,6 @@ int main(void)
 
 	glEnable(GL_DEPTH_TEST);
 
-	//glFrontFace(GL_CCW);
 	init();
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
