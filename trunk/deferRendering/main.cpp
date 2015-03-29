@@ -42,7 +42,9 @@ JFrameBufferObject* deferredFBO = NULL;
 
 //------------screenLevel--------------
 
-JMesh *screen = NULL;
+JMesh *screenDiffuse = NULL;
+JMesh *screenNormal = NULL;
+
 JCamera* screenCamera;
 JLevel *screenLevel = NULL;
 
@@ -109,14 +111,28 @@ int initObjects()
 
 	obj1->setMaterial(matDeferred);
 
-	screen = new JMesh();
+	//-------------------screen------------------
+
+	screenDiffuse = new JMesh();
 	
-	if( makePlane(JScreenWidth/2, JScreenHeight/2, 1, 1, tmpNormal, *screen, false ) != 0 )
+	if( makePlane(JScreenWidth/2, JScreenHeight/2, 1, 1, tmpNormal, *screenDiffuse, false ) != 0 )
 	{
 		return -1;
 	}
-	screen->position[0] = -JScreenWidth/4;
-	if( screen->refreshVBO() != 0 )
+	screenDiffuse->position[0] = -JScreenWidth/4;
+	screenDiffuse->position[1] = JScreenHeight/4;
+	if( screenDiffuse->refreshVBO() != 0 )
+		return -1;
+
+	screenNormal = new JMesh();
+
+	if( makePlane(JScreenWidth/2, JScreenHeight/2, 1, 1, tmpNormal, *screenNormal, false ) != 0 )
+	{
+		return -1;
+	}
+	screenNormal->position[0] = JScreenWidth/4;
+	screenNormal->position[1] = JScreenHeight/4;
+	if( screenNormal->refreshVBO() != 0 )
 		return -1;
 
 	JMaterial* screenMaterial = new JMaterial();
@@ -128,7 +144,8 @@ int initObjects()
 		return -1;
 	}
 
-	screen->setMaterial( screenMaterial );
+	screenDiffuse->setMaterial( screenMaterial );
+	screenNormal->setMaterial( screenMaterial );
 
 	return 0;
 }
@@ -180,7 +197,8 @@ int init()
 	worldLevel->pushCamera( worldCamera );
 	
 	screenLevel = new JLevel();
-	screenLevel->pushMesh( screen );
+	screenLevel->pushMesh( screenDiffuse );
+	screenLevel->pushMesh( screenNormal );
 	screenLevel->pushCamera( screenCamera );
 	
 	return 0;
@@ -189,10 +207,10 @@ int init()
 int draw()
 {
 	glClearColor( 0.5,0.5,0,1);
-	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	worldLevel->draw();
 	glClearColor( 0,0,1,1);
-	glClear(GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	screenLevel->draw();
 
 	return 0;
@@ -201,7 +219,7 @@ int draw()
 int release()
 {
 	SAFE_DELETE( obj1 );
-	SAFE_DELETE( screen );
+	SAFE_DELETE( screenDiffuse );
 	SAFE_DELETE( screenLevel );
 	SAFE_DELETE( worldLevel );
 	return 0;
@@ -228,7 +246,7 @@ int main(void)
 	glEnable (GL_BLEND);
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 
 	//glFrontFace(GL_CCW);
 	init();
