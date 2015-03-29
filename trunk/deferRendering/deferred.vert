@@ -11,6 +11,7 @@ out VS_OUT
 {
 	vec4 color;
 	vec3 position;
+	vec3 normal;
 } vs_out;
 
 
@@ -20,4 +21,5 @@ void main(void)
 	gl_Position = mvp * vec4(position,1);
 	vs_out.color = diffuse;
 	vs_out.position = position;
+	vs_out.normal = normal;
 }

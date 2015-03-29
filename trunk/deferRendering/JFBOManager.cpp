@@ -309,9 +309,9 @@ JFrameBufferObject::JFrameBufferObject()
 	bufferID = -1;//Any glGen* function would return ID of 0. 0 is for only special use.
 
 	colorTex = NULL;
-	depthTex = NULL;
+	depthRBO = 0;
 	positionTex = NULL;
-
+	normalTex = NULL;
 	stencilID = 0;
 }
 
@@ -378,23 +378,41 @@ int JFrameBufferObject::reset( int jfbo_brushes, GLsizei aWidth, GLsizei aHeight
 			positionTex = NULL;
 		}
 
+		if( (jfbo_brushes & BRUSH_NORMAL) )
+		{
+			//TODO : delete existing textures
+			normalTex = new JTextureObject();
+			result = JTextureManager::Inst()->makeTexture( *normalTex, aWidth, aHeight, JTEXTUREKIND_COLOR );
+			if( result != 0 )
+				throw;
+
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, normalTex->bufID, 0);
+
+		}
+		else if( !(jfbo_brushes & BRUSH_NORMAL) )
+		{
+			if(normalTex)
+				JTextureManager::Inst()->deleteTexture( *normalTex );
+			//TODO  detach
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, 0, 0);
+			normalTex = NULL;
+		}
+
 		if( (jfbo_brushes & BRUSH_DEPTH) )
 		{
 
-			depthTex = new JTextureObject();
-			result = JTextureManager::Inst()->makeTexture( *depthTex, aWidth, aHeight, JTEXTUREKIND_DEPTH );
-			if(result != 0)
-				throw;
+			glGenRenderbuffers(1, &depthRBO);
+			glBindRenderbuffer(GL_RENDERBUFFER, depthRBO);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, aWidth, aHeight);
+			glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex->bufID, 0);
+
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRBO);
 		}
-		else if( !(jfbo_brushes & BRUSH_DEPTH) && depthTex == NULL )
+		else if( !(jfbo_brushes & BRUSH_DEPTH) && depthRBO == 0 )
 		{
-			if(depthTex)
-				JTextureManager::Inst()->deleteTexture( *depthTex );
-			//TODO detach
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
-			depthTex = NULL;
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+			depthRBO = 0;
 		}
 	/*
 		The width and height of framebuffer-attachable image must be not zero.
@@ -463,11 +481,16 @@ int JFrameBufferObject::setOutputDrawBuffer()
 		drawBuffers[attachmentCnt] = GL_COLOR_ATTACHMENT1;
 		attachmentCnt++;
 	}
+	if( brushes & JFBO_BRUSHES::BRUSH_NORMAL)
+	{
+		drawBuffers[attachmentCnt] = GL_COLOR_ATTACHMENT2;
+		attachmentCnt++;
+	}/*NO!!! dont use depth componenent as output drawbuffer
 	if( brushes & JFBO_BRUSHES::BRUSH_DEPTH)
 	{
 		drawBuffers[attachmentCnt] = GL_DEPTH_ATTACHMENT;
 		attachmentCnt++;
-	}
+	}*/
 
 	if( attachmentCnt==0 )
 		return -1;
@@ -485,10 +508,13 @@ JTextureObject* JFrameBufferObject::getTextureObjectOfCanvas( JFBO_BRUSHES which
 		return colorTex;
 		break;
 	case BRUSH_DEPTH:
-		return depthTex;
+		return NULL;
 		break;
 	case BRUSH_POSITION:
 		return positionTex;
+		break;
+	case BRUSH_NORMAL:
+		return normalTex;
 		break;
 	}
 	return NULL;
