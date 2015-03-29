@@ -44,9 +44,9 @@ int makeSphere( float radius, unsigned int smoothness, JMesh& mesh )
 				tmpvertices[i*slicenum + j].uv[0] = ((float)slicenum-1)/j;
 				tmpvertices[i*slicenum + j].uv[1] = ((float)smoothness+2-1)/i;
 
-				tmpvertices[i*slicenum + j].diffuse[0] = ((float)(rand()%10))/10;
-				tmpvertices[i*slicenum + j].diffuse[1] = ((float)(rand()%10))/10;
-				tmpvertices[i*slicenum + j].diffuse[2] = ((float)(rand()%10))/10;
+				tmpvertices[i*slicenum + j].diffuse[0] = 1;
+				tmpvertices[i*slicenum + j].diffuse[1] = 1;
+				tmpvertices[i*slicenum + j].diffuse[2] = 0;
 				tmpvertices[i*slicenum + j].diffuse[3] = 1;
 			}
 		}
