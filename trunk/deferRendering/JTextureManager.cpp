@@ -17,8 +17,8 @@ int JTextureManager::makeTexture( JTextureObject& texObj, GLsizei width, GLsizei
 		justFormat = GL_RGBA;
 		break;
 	case JTEXTUREKIND_DEPTH:
-		internalFormat = GL_DEPTH_COMPONENT16;
-		justFormat = GL_DEPTH_COMPONENT16;
+		internalFormat = GL_DEPTH_COMPONENT32F;
+		justFormat = GL_DEPTH_COMPONENT;
 		break;
 	default:
 		return -1;
@@ -47,7 +47,7 @@ int JTextureManager::makeTexture( JTextureObject& texObj, GLsizei width, GLsizei
 	}
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-	if( fillWithRandomColor )
+	if( fillWithRandomColor && kind == JTEXTUREKIND_COLOR )
 	{
 		
 		glTexImage2D(GL_TEXTURE_2D,0,internalFormat,width,height,0,justFormat,GL_UNSIGNED_BYTE,randomPixelDatas);
@@ -63,9 +63,10 @@ int JTextureManager::makeTexture( JTextureObject& texObj, GLsizei width, GLsizei
 	}
 
 	glBindTexture(GL_TEXTURE_2D, 0);
-	if(glGetError() != GL_NO_ERROR)
+	GLenum err = glGetError();
+	if(err != GL_NO_ERROR)
 	{
-		fillWithRandomColor = fillWithRandomColor;
+		err = err;
 	}
 	
 	JTextureObject* tObj = new JTextureObject();

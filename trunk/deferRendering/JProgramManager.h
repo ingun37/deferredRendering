@@ -67,7 +67,7 @@ class JProgramManager
 		int makeProgram(GLuint attachingVertexShader, GLuint attachingFragmentShader, GLuint& programID);
 public:
 		static unsigned int currentlyRunningProgram;
-		static shaderInfo* currentlyRunningInfo;
+		static const shaderInfo* currentlyRunningInfo;
 		
 		
 
