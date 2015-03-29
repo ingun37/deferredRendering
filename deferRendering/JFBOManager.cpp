@@ -312,6 +312,7 @@ JFrameBufferObject::JFrameBufferObject()
 	depthRBO = 0;
 	positionTex = NULL;
 	normalTex = NULL;
+	texTex = NULL;
 	stencilID = 0;
 }
 
@@ -338,7 +339,7 @@ int JFrameBufferObject::reset( int jfbo_brushes, GLsizei aWidth, GLsizei aHeight
 	try
 	{
 		brushes = jfbo_brushes;
-		if( (jfbo_brushes & BRUSH_TEX1) )
+		if( (jfbo_brushes & BRUSH_DIFFUSE) )
 		{
 			//TODO : delete existing textures
 			colorTex = new JTextureObject();
@@ -349,7 +350,7 @@ int JFrameBufferObject::reset( int jfbo_brushes, GLsizei aWidth, GLsizei aHeight
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex->bufID, 0);
 			
 		}
-		else if( !(jfbo_brushes & BRUSH_TEX1) )
+		else if( !(jfbo_brushes & BRUSH_DIFFUSE) )
 		{
 			if(colorTex)
 				JTextureManager::Inst()->deleteTexture( *colorTex );
@@ -397,7 +398,25 @@ int JFrameBufferObject::reset( int jfbo_brushes, GLsizei aWidth, GLsizei aHeight
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, 0, 0);
 			normalTex = NULL;
 		}
+		if( (jfbo_brushes & BRUSH_TEX) )
+		{
+			//TODO : delete existing textures
+			texTex = new JTextureObject();
+			result = JTextureManager::Inst()->makeTexture( *texTex, aWidth, aHeight, JTEXTUREKIND_COLOR );
+			if( result != 0 )
+				throw;
 
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, texTex->bufID, 0);
+
+		}
+		else if( !(jfbo_brushes & BRUSH_TEX) )
+		{
+			if(texTex)
+				JTextureManager::Inst()->deleteTexture( *texTex );
+			//TODO  detach
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, 0, 0);
+			texTex = NULL;
+		}
 		if( (jfbo_brushes & BRUSH_DEPTH) )
 		{
 
@@ -471,7 +490,7 @@ int JFrameBufferObject::setOutputDrawBuffer()
 
 
 	
-	if( brushes & JFBO_BRUSHES::BRUSH_TEX1)
+	if( brushes & JFBO_BRUSHES::BRUSH_DIFFUSE)
 	{
 		drawBuffers[attachmentCnt] = GL_COLOR_ATTACHMENT0;
 		attachmentCnt++;
@@ -485,7 +504,13 @@ int JFrameBufferObject::setOutputDrawBuffer()
 	{
 		drawBuffers[attachmentCnt] = GL_COLOR_ATTACHMENT2;
 		attachmentCnt++;
-	}/*NO!!! dont use depth componenent as output drawbuffer
+	}
+	if( brushes & JFBO_BRUSHES::BRUSH_TEX)
+	{
+		drawBuffers[attachmentCnt] = GL_COLOR_ATTACHMENT3;
+		attachmentCnt++;
+	}
+	/*NO!!! dont use depth componenent as output drawbuffer
 	if( brushes & JFBO_BRUSHES::BRUSH_DEPTH)
 	{
 		drawBuffers[attachmentCnt] = GL_DEPTH_ATTACHMENT;
@@ -504,7 +529,7 @@ JTextureObject* JFrameBufferObject::getTextureObjectOfCanvas( JFBO_BRUSHES which
 {
 	switch(whichTex)
 	{
-	case BRUSH_TEX1:
+	case BRUSH_DIFFUSE:
 		return colorTex;
 		break;
 	case BRUSH_DEPTH:
@@ -515,6 +540,9 @@ JTextureObject* JFrameBufferObject::getTextureObjectOfCanvas( JFBO_BRUSHES which
 		break;
 	case BRUSH_NORMAL:
 		return normalTex;
+		break;
+	case BRUSH_TEX:
+		return texTex;
 		break;
 	}
 	return NULL;

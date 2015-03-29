@@ -29,6 +29,7 @@ public:
 class shaderInfo_Deferred : public shaderInfo
 { 
 public:
+	unsigned int ltex;
 	shaderInfo_Deferred()
 	{
 		//TODO set shaderkind to JShader_Deferred
@@ -78,7 +79,7 @@ public:
 		int setOutputDrawBuffer( JFrameBufferObject* fbo );
 
 		shaderInfo_Deferred* setProgram_Deferred(const string& name, char* vpath, char* fpath);
-		int setUniformVariables_Deferred( JMatrix44 mvp );
+		int setUniformVariables_Deferred( JMatrix44 mvp, JTextureObject* tex );
 		
 		shaderInfo_TexUnlit* setProgram_TexUnlit(const string& name, char* vpath, char* fpath);
 		int setUniformVariables_TexUnlit( JMatrix44 mvp, JTextureObject* aTex );
