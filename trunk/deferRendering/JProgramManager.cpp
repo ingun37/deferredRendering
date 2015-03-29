@@ -204,7 +204,7 @@ int JProgramManager::setOutputDrawBuffer( JFrameBufferObject* fbo )
 
 	if(fbo->brushes & JFBO_BRUSHES::BRUSH_DEPTH)
 		attachmentCnt++;
-	if(fbo->brushes & JFBO_BRUSHES::BRUSH_TEX1)
+	if(fbo->brushes & JFBO_BRUSHES::BRUSH_DIFFUSE)
 		attachmentCnt++;
 	if(fbo->brushes & JFBO_BRUSHES::BRUSH_STENCIL)
 		attachmentCnt++;
@@ -238,11 +238,8 @@ shaderInfo_Deferred* JProgramManager::setProgram_Deferred(const string& name, ch
 	if(makeProgram(info->v, info->f, info->p) != 0)
 		return NULL;
 
-	char mvpUniName[] = "mvp";
-	info->lmvp = glGetUniformLocation (info->p, mvpUniName);
-
-	if(info->lmvp == -1)
-		return NULL;
+	info->lmvp = 4;
+	info->ltex = 5;
 
 	if(info->p > 0)
 		programs[name] = info;
@@ -250,7 +247,7 @@ shaderInfo_Deferred* JProgramManager::setProgram_Deferred(const string& name, ch
 	return info;
 }
 
-int JProgramManager::setUniformVariables_Deferred( JMatrix44 mvp )
+int JProgramManager::setUniformVariables_Deferred( JMatrix44 mvp, JTextureObject* aTex )
 {
 	if(JProgramManager::currentlyRunningInfo->shaderKind != JSHADERKIND_DEFERRED)
 		return -1;
@@ -259,6 +256,9 @@ int JProgramManager::setUniformVariables_Deferred( JMatrix44 mvp )
 
 	glUniformMatrix4fv( shaderinfo->lmvp, 1, GL_TRUE, &mvp[0][0] );
 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, aTex->bufID );
+	glUniform1i(shaderinfo->ltex,0);
 	return 0;
 }
 

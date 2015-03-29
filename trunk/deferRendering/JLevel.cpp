@@ -79,7 +79,7 @@ int JLevel::draw()
 
 						break;
 					case JSHADERKIND_DEFERRED:
-						JProgramManager::Inst()->setUniformVariables_Deferred( mP * mV * mM );
+						JProgramManager::Inst()->setUniformVariables_Deferred( mP * mV * mM, material->texObj );
 						break;
 					default:
 						uniformVariableSetsuccess = false;
@@ -150,4 +150,38 @@ int JLevel::draw()
 		}
 	}
 	return 0;
+}
+
+int JLevel::removeMesh(JMesh* pMesh)
+{
+	if(pMesh)
+	{
+		for(int i=0;i<meshes.size();i++)
+		{
+			if(meshes[i]==pMesh)
+			{
+				meshes.erase( meshes.begin() + i);
+				break;
+			}
+		}
+		return 0;
+	}
+	return -1;
+}
+
+int JLevel::removeCamera(JCamera* pCamera)
+{
+	if(pCamera)
+	{
+		for(int i=0;i<cameras.size();i++)
+		{
+			if(cameras[i]==pCamera)
+			{
+				cameras.erase( cameras.begin() + i);
+				break;
+			}
+		}
+		return 0;
+	}
+	return -1;
 }

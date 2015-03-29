@@ -12,6 +12,7 @@ out VS_OUT
 	vec4 color;
 	vec3 position;
 	vec3 normal;
+	vec2 uv;
 } vs_out;
 
 
@@ -22,4 +23,5 @@ void main(void)
 	vs_out.color = diffuse;
 	vs_out.position = position;
 	vs_out.normal = normal;
+	vs_out.uv = uv;
 }

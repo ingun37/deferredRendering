@@ -41,8 +41,8 @@ int makeSphere( float radius, unsigned int smoothness, JMesh& mesh )
 				tmpvertices[i*slicenum + j].normal[2] = tmpvertices[i*slicenum + j].position[2]/radius;
 				
 						
-				tmpvertices[i*slicenum + j].uv[0] = ((float)slicenum-1)/j;
-				tmpvertices[i*slicenum + j].uv[1] = ((float)smoothness+2-1)/i;
+				tmpvertices[i*slicenum + j].uv[0] = ((float)j)/(slicenum-1);
+				tmpvertices[i*slicenum + j].uv[1] = 1- ((float)i)/(smoothness+2-1);
 
 				tmpvertices[i*slicenum + j].diffuse[0] = 0;
 				tmpvertices[i*slicenum + j].diffuse[1] = 1;
@@ -109,7 +109,7 @@ int makePlane(float widthLen, float heightLen, unsigned int widthSeg, unsigned i
 	normalInit[0]=0;
 	normalInit[1]=1;
 	normalInit[2]=0;
-	JVector3 rotAxis = normalInit / normal;
+	JVector3 rotAxis = normal / normalInit;
 	float rotAngle;
 
 	rotAngle = normal.angleBetween( normalInit );

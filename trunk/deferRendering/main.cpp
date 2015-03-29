@@ -19,7 +19,8 @@ using namespace std;
 #define SAFE_DELETE(p) if(p){ delete (p); }
 //-------textures----------
 JTextureObject* texCheck = NULL;
-
+JTextureObject* texWorldmap = NULL;
+JTextureObject* texBlock = NULL;
 //---------shaders----------
 shaderInfo* shaderDiffusue = NULL;
 shaderInfo* shaderTexUnlit = NULL;
@@ -29,6 +30,9 @@ shaderInfo* shaderDeferred = NULL;
 JMaterial* matTexUnlit = NULL;
 JMaterial* matDeferred = NULL;
 JMaterial* matDiffuse = NULL;
+
+JMesh *objTable = NULL;
+JMaterial *matTable = NULL;
 
 JMesh *obj1 = NULL;
 JMesh *obj2 = NULL;
@@ -45,6 +49,7 @@ JFrameBufferObject* deferredFBO = NULL;
 JMesh *screenDiffuse = NULL;
 JMesh *screenPosition = NULL;
 JMesh *screenNormal = NULL;
+JMesh *screenTex = NULL;
 
 JCamera* screenCamera;
 JLevel *screenLevel = NULL;
@@ -54,15 +59,20 @@ JLevel *screenLevel = NULL;
 
 int initFBO()
 {
-	deferredFBO = JFBOManager::Inst()->makeCanvasWithAttribute( JFBO_BRUSHES::BRUSH_DEPTH | JFBO_BRUSHES::BRUSH_TEX1 | JFBO_BRUSHES::BRUSH_POSITION | JFBO_BRUSHES::BRUSH_NORMAL,JScreenWidth,JScreenHeight);
+	deferredFBO = JFBOManager::Inst()->makeCanvasWithAttribute( JFBO_BRUSHES::BRUSH_DEPTH | JFBO_BRUSHES::BRUSH_DIFFUSE | JFBO_BRUSHES::BRUSH_POSITION | JFBO_BRUSHES::BRUSH_NORMAL | JFBO_BRUSHES::BRUSH_TEX,JScreenWidth,JScreenHeight);
 	return 0;
 }
 
 int initTextures()
 {
-	texCheck = new JTextureObject();
-	if( JTextureManager::Inst()->makeTexture( *texCheck, JScreenWidth, JScreenHeight, JTEXTUREKIND_COLOR, false ) == -1 )
+	texWorldmap = new JTextureObject();
+	if( JTextureManager::Inst()->makeTexture( *texWorldmap,JTEXTURE_IMAGEFORMAT::JIMGFORMAT_BMP,"../deferRendering/earthtoon.bmp" ) == -1 )
 		return -1;
+
+	texBlock = new JTextureObject();
+	if( JTextureManager::Inst()->makeTexture( *texBlock,JTEXTURE_IMAGEFORMAT::JIMGFORMAT_BMP,"../deferRendering/block.bmp" ) == -1 )
+		return -1;
+
 
 	return 0;
 }
@@ -81,21 +91,44 @@ int initShaders()
 int initMaterial()
 {
 	matDeferred = new JMaterial();
+	matDeferred->texObj = texWorldmap;
 	matDeferred->shaderinfo = shaderDeferred;
 
 	matDiffuse = new JMaterial();
 	matDiffuse->shaderinfo = shaderDiffusue;
+
+	matTexUnlit = new JMaterial();
+	matTexUnlit->texObj = texWorldmap;
+	matTexUnlit->shaderinfo = shaderTexUnlit;
+
+	matTable = new JMaterial();
+	matTable->texObj = texBlock;
+	matTable->shaderinfo = shaderDeferred;
 	return 0;
 }
 
 int initObjects()
 {
+	JVector3 tmpNormal;
+	tmpNormal[0] = 0;
+	tmpNormal[1] = 1;
+	tmpNormal[2] = 0;
+
+	objTable = new JMesh();
+	if( makePlane(10, 10, 1, 1, tmpNormal, *objTable, false ) != 0 )
+	{
+		return -1;
+	}
+	if( objTable->refreshVBO() != 0 )
+		return -1;
+	objTable->position[1] = -1;
+	objTable->material = matTable;
+	
 	obj1 = new JMesh();
 
-
 	unsigned int smoothness2 = 7;
-	float radius2 = 3.8;
-	JVector3 tmpNormal;
+	float radius2 = 1;
+	
 	tmpNormal[0] = 0;
 	tmpNormal[1] = 0;
 	tmpNormal[2] = 1;
@@ -106,7 +139,7 @@ int initObjects()
 	}
 	if( obj1->refreshVBO() != 0 )
 		return -1;
-	//obj1->position[0] = 3;
+	//obj1->position[1] = 3;
 
 	obj1->setMaterial(matDeferred);
 
@@ -128,7 +161,7 @@ int initObjects()
 	JMaterial* screenMaterial = new JMaterial();
 	screenMaterial->shaderinfo = shaderTexUnlit;
 	
-	screenMaterial->texObj = deferredFBO->getTextureObjectOfCanvas( BRUSH_TEX1 );
+	screenMaterial->texObj = deferredFBO->getTextureObjectOfCanvas( BRUSH_DIFFUSE );
 	if(screenMaterial->texObj == NULL)
 	{
 		return -1;
@@ -176,6 +209,26 @@ int initObjects()
 
 	screenNormal->setMaterial( screenNormalMat );
 
+
+	screenTex = new JMesh();
+
+	if( makePlane(JScreenWidth/2, JScreenHeight/2, 1, 1, tmpNormal, *screenTex, false ) != 0 )
+	{
+		return -1;
+	}
+	screenTex->position[0] = JScreenWidth/4;
+	screenTex->position[1] = -JScreenHeight/4;
+	if( screenTex->refreshVBO() != 0 )
+		return -1;
+
+	JMaterial* screenTexMat = new JMaterial();
+	screenTexMat->shaderinfo = shaderTexUnlit;
+	screenTexMat->texObj = deferredFBO->getTextureObjectOfCanvas( BRUSH_TEX );
+	if(screenTexMat->texObj == NULL)
+		return -1;
+
+	screenTex->setMaterial( screenTexMat );
+
 	return 0;
 }
 int initCameras()
@@ -183,8 +236,8 @@ int initCameras()
 	JVector3 pos, up, at;
 
 	pos[0] = 0;
-	pos[1] = 0;
-	pos[2] = 10;
+	pos[1] = 7;
+	pos[2] = 11;
 	
 	up[0] = 0;
 	up[1] = 1;
@@ -198,6 +251,18 @@ int initCameras()
 	worldCamera->setTargetFBO( deferredFBO );
 	worldCamera->setTransform( pos, up, at ,JScreenWidth, JScreenHeight, 1.f, 100 );
 	
+	pos[0] = 0;
+	pos[1] = 0;
+	pos[2] = 10;
+
+	up[0] = 0;
+	up[1] = 1;
+	up[2] = 0;
+
+	at[0] = 0;
+	at[1] = 0;
+	at[2] = 0;
+
 	screenCamera = new JCameraOrtho();
 	screenCamera->setTransform( pos, up, at ,JScreenWidth, JScreenHeight, 1.f, 100 );
 	
@@ -223,12 +288,14 @@ int init()
 
 	worldLevel = new JLevel();
 	worldLevel->pushMesh( obj1 );
+	worldLevel->pushMesh( objTable );
 	worldLevel->pushCamera( worldCamera );
 	
 	screenLevel = new JLevel();
 	screenLevel->pushMesh( screenDiffuse );
 	screenLevel->pushMesh( screenPosition );
 	screenLevel->pushMesh( screenNormal );
+	screenLevel->pushMesh(screenTex);
 	screenLevel->pushCamera( screenCamera );
 	
 	return 0;
@@ -241,7 +308,7 @@ int draw()
 	worldLevel->draw();
 
 
-	glClearColor( 0,1,1,1);
+	glClearColor( 0,0.2,0.2,1);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	screenLevel->draw();
 
@@ -273,6 +340,15 @@ int release()
 	SAFE_DELETE( worldLevel );
 	return 0;
 }
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if (key == GLFW_KEY_1 && action == GLFW_RELEASE)
+	{
+
+	}
+}
+
 int main(void)
 {
     GLFWwindow* window;
@@ -296,6 +372,8 @@ int main(void)
 	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_DEPTH_TEST);
+
+	glfwSetKeyCallback(window, key_callback);
 
 	init();
     /* Loop until the user closes the window */

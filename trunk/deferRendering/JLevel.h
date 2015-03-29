@@ -21,6 +21,9 @@ public:
 	int pushMesh( JMesh* pMesh );
 	int pushCamera( JCamera* pCamera );
 
+	int removeMesh( JMesh* pMesh );
+	int removeCamera( JCamera* pCamera );
+
 	JLevel();
 };
 
