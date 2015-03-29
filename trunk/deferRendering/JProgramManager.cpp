@@ -318,7 +318,7 @@ int JProgramManager::setUniformVariables_TexUnlit( JMatrix44 mvp, JTextureObject
 	glBufferData(GL_UNIFORM_BUFFER, shaderinfo->uniformBlockSize, shaderinfo->buffer, GL_DYNAMIC_DRAW);
 	*/
 	
-	glUniformMatrix4fv(shaderinfo->lmvp, 1, GL_FALSE, (GLfloat*)(&mvp));
+	glUniformMatrix4fv(shaderinfo->lmvp, 1, GL_TRUE, (GLfloat*)(&mvp));
 	
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, aTex->bufID );

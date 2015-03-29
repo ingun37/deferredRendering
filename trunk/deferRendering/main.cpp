@@ -23,11 +23,17 @@ JTextureObject* texCheck = NULL;
 //---------shaders----------
 shaderInfo* shaderDiffusue = NULL;
 shaderInfo* shaderTexUnlit = NULL;
+shaderInfo* shaderDeferred = NULL;
 
 //-------objectsLevel-------
 JMaterial* matTexUnlit = NULL;
+JMaterial* matDeferred = NULL;
 JMaterial* matDiffuse = NULL;
-JMesh *obj = NULL;
+
+JMesh *obj1 = NULL;
+JMesh *obj2 = NULL;
+JMesh *obj3 = NULL;
+JMesh *obj4 = NULL;
 
 JCamera* worldCamera;
 JLevel *worldLevel = NULL;
@@ -62,16 +68,26 @@ int initShaders()
 {
 	shaderDiffusue = JProgramManager::Inst()->setProgram_Diffuse("diffuse","../deferRendering/diffuse.vert","../deferRendering/diffuse.frag");
 	shaderTexUnlit = JProgramManager::Inst()->setProgram_TexUnlit("texunlit","../deferRendering/texunlit.vert","../deferRendering/texunlit.frag");
-
+	shaderDeferred = JProgramManager::Inst()->setProgram_Deferred("deferred","../deferRendering/deferred.vert","../deferRendering/deferred.frag");
 	if( shaderDiffusue == NULL || shaderTexUnlit == NULL )
 		return -1;
 
 	return 0;
 }
 
+int initMaterial()
+{
+	matDeferred = new JMaterial();
+	matDeferred->shaderinfo = shaderDiffusue;
+
+	matDiffuse = new JMaterial();
+	matDiffuse->shaderinfo = shaderDiffusue;
+	return 0;
+}
+
 int initObjects()
 {
-	obj = new JMesh();
+	obj1 = new JMesh();
 
 	unsigned int smoothness1 = 1;
 	float radius1 = 1;
@@ -83,17 +99,15 @@ int initObjects()
 	tmpNormal[1] = 0;
 	tmpNormal[2] = 1;
 	
-	if( makeSphere( radius2, smoothness2, *obj ) != 0 )
+	if( makeSphere( radius2, smoothness2, *obj1 ) != 0 )
 	{
 		return -1;
 	}
-	if( obj->refreshVBO() != 0 )
+	if( obj1->refreshVBO() != 0 )
 		return -1;
-	
-	matDiffuse = new JMaterial();
-	matDiffuse->shaderinfo = shaderDiffusue;
+	//obj1->position[0] = 3;
 
-	obj->setMaterial(matDiffuse);
+	obj1->setMaterial(matDeferred);
 
 	screen = new JMesh();
 	
@@ -101,6 +115,7 @@ int initObjects()
 	{
 		return -1;
 	}
+	screen->position[0] = -JScreenWidth/4;
 	if( screen->refreshVBO() != 0 )
 		return -1;
 
@@ -152,13 +167,16 @@ int init()
 		return -1;
 	if( initShaders() != 0)
 		return -1;
+	if ( initMaterial() != 0 )
+		return -1;
+	
 	if( initCameras() != 0 )
 		return -1;
 	if( initObjects() != 0 )
 		return -1;
 
 	worldLevel = new JLevel();
-	worldLevel->pushMesh( obj );
+	worldLevel->pushMesh( obj1 );
 	worldLevel->pushCamera( worldCamera );
 	
 	screenLevel = new JLevel();
@@ -182,7 +200,7 @@ int draw()
 
 int release()
 {
-	SAFE_DELETE( obj );
+	SAFE_DELETE( obj1 );
 	SAFE_DELETE( screen );
 	SAFE_DELETE( screenLevel );
 	SAFE_DELETE( worldLevel );
