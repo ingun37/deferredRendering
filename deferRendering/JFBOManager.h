@@ -16,6 +16,7 @@ using namespace std;
 enum JFBO_BRUSHES
 {
 	BRUSH_TEX1 = 1,
+	BRUSH_POSITION = 2,
 	BRUSH_DEPTH = 16,
 	BRUSH_STENCIL = 32
 };
@@ -30,6 +31,7 @@ public:
 	GLuint bufferID;
 
 	JTextureObject* colorTex;
+	JTextureObject* positionTex;
 	JTextureObject* depthTex;
 	
 	GLuint stencilID;
@@ -41,6 +43,7 @@ public:
 	int reset( int jfbo_brushes, GLsizei width, GLsizei height);
 	int bind();//binding FBO also glDrawBuffer
 	int unbind();
+	int setOutputDrawBuffer();
 	JTextureObject* getTextureObjectOfCanvas( JFBO_BRUSHES whichTex );//textures made in middle of creating fbo has no "string" key but only "unsigned int" key.
 };
 

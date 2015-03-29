@@ -42,9 +42,10 @@ int JLevel::draw()
 		if(fbo)
 		{
 			fbo->bind();
-			JProgramManager::Inst()->setOutputDrawBuffer( fbo );
-			glClear(GL_COLOR_BUFFER_BIT);
-			//glViewport(0,0,fbo->width,fbo->height);
+			fbo->setOutputDrawBuffer();
+			
+			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+			
 			for( unsigned int mi = 0;mi<meshes.size();mi++)
 			{
 				JMesh* mesh = meshes[mi];
@@ -77,7 +78,7 @@ int JLevel::draw()
 							uniformVariableSetsuccess = false;
 
 						break;
-					case JSHADERKIND_DEFERRED: //in this case, it is meant to not to be here.
+					case JSHADERKIND_DEFERRED:
 						JProgramManager::Inst()->setUniformVariables_Deferred( mP * mV * mM );
 						break;
 					default:
@@ -93,11 +94,12 @@ int JLevel::draw()
 				}
 			}
 
-			//JProgramManager::Inst()->setOutputDrawBuffer( NULL );
+			
 			fbo->unbind();
 		}
 		else
 		{
+			//glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 			for( unsigned int mi = 0;mi<meshes.size();mi++)
 			{
 				JMesh* mesh = meshes[mi];

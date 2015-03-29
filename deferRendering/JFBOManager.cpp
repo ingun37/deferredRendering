@@ -309,8 +309,9 @@ JFrameBufferObject::JFrameBufferObject()
 	bufferID = -1;//Any glGen* function would return ID of 0. 0 is for only special use.
 
 	colorTex = NULL;
-
 	depthTex = NULL;
+	positionTex = NULL;
+
 	stencilID = 0;
 }
 
@@ -350,26 +351,49 @@ int JFrameBufferObject::reset( int jfbo_brushes, GLsizei aWidth, GLsizei aHeight
 		}
 		else if( !(jfbo_brushes & BRUSH_TEX1) )
 		{
-			JTextureManager::Inst()->deleteTexture( *colorTex );
+			if(colorTex)
+				JTextureManager::Inst()->deleteTexture( *colorTex );
 			//TODO  detach
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
 			colorTex = NULL;
 		}
 
+		if( (jfbo_brushes & BRUSH_POSITION) )
+		{
+			//TODO : delete existing textures
+			positionTex = new JTextureObject();
+			result = JTextureManager::Inst()->makeTexture( *positionTex, aWidth, aHeight, JTEXTUREKIND_COLOR );
+			if( result != 0 )
+				throw;
+
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, positionTex->bufID, 0);
+
+		}
+		else if( !(jfbo_brushes & BRUSH_POSITION) )
+		{
+			if(positionTex)
+				JTextureManager::Inst()->deleteTexture( *positionTex );
+			//TODO  detach
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
+			positionTex = NULL;
+		}
+
 		if( (jfbo_brushes & BRUSH_DEPTH) )
 		{
+
 			depthTex = new JTextureObject();
-			result = JTextureManager::Inst()->makeTexture( *depthTex, aWidth, aHeight, JTEXTUREKIND_COLOR );
+			result = JTextureManager::Inst()->makeTexture( *depthTex, aWidth, aHeight, JTEXTUREKIND_DEPTH );
 			if(result != 0)
 				throw;
 
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, depthTex->bufID, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex->bufID, 0);
 		}
 		else if( !(jfbo_brushes & BRUSH_DEPTH) && depthTex == NULL )
 		{
-			JTextureManager::Inst()->deleteTexture( *depthTex );
+			if(depthTex)
+				JTextureManager::Inst()->deleteTexture( *depthTex );
 			//TODO detach
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
 			depthTex = NULL;
 		}
 	/*
@@ -415,6 +439,44 @@ int JFrameBufferObject::unbind()
 	return 0;
 }
 
+int JFrameBufferObject::setOutputDrawBuffer()
+{
+	//according to https://www.opengl.org/wiki/Framebuffer_Object ...
+	//The minimum value for this is 8, so you are guaranteed to be able to have at least color attachments 0-7
+
+	/*
+	least number of drawBuffers is 8 (according to above.. )
+	*/
+	GLenum drawBuffers[16];
+
+	int attachmentCnt = 0;
+
+
+	
+	if( brushes & JFBO_BRUSHES::BRUSH_TEX1)
+	{
+		drawBuffers[attachmentCnt] = GL_COLOR_ATTACHMENT0;
+		attachmentCnt++;
+	}
+	if( brushes & JFBO_BRUSHES::BRUSH_POSITION)
+	{
+		drawBuffers[attachmentCnt] = GL_COLOR_ATTACHMENT1;
+		attachmentCnt++;
+	}
+	if( brushes & JFBO_BRUSHES::BRUSH_DEPTH)
+	{
+		drawBuffers[attachmentCnt] = GL_DEPTH_ATTACHMENT;
+		attachmentCnt++;
+	}
+
+	if( attachmentCnt==0 )
+		return -1;
+
+	glDrawBuffers( attachmentCnt, drawBuffers );
+
+	return 0;
+}
+
 JTextureObject* JFrameBufferObject::getTextureObjectOfCanvas( JFBO_BRUSHES whichTex )
 {
 	switch(whichTex)
@@ -424,6 +486,9 @@ JTextureObject* JFrameBufferObject::getTextureObjectOfCanvas( JFBO_BRUSHES which
 		break;
 	case BRUSH_DEPTH:
 		return depthTex;
+		break;
+	case BRUSH_POSITION:
+		return positionTex;
 		break;
 	}
 	return NULL;

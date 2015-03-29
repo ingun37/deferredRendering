@@ -87,7 +87,7 @@ static char* getshadersourcefromfile(char* path,unsigned int* plen)
 }
 
 unsigned int JProgramManager::currentlyRunningProgram = 0;
-shaderInfo* JProgramManager::currentlyRunningInfo = NULL;
+const shaderInfo* JProgramManager::currentlyRunningInfo = NULL;
 
 int JProgramManager::makeShader(char* path, GLenum type, GLint* perror, GLuint& shaderID)
 {
@@ -168,7 +168,11 @@ int JProgramManager::useProgram(const string& shaderName)
 int JProgramManager::useProgram(const shaderInfo* sInfo)
 {
 	if(sInfo == NULL) return -1;
-	return useProgram(sInfo->name);
+
+	currentlyRunningInfo = sInfo;
+	glUseProgram( sInfo->p );
+
+	return 0;
 }
 
 int JProgramManager::setOutputDrawBuffer( JFrameBufferObject* fbo )
