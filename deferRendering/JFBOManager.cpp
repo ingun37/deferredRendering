@@ -309,7 +309,7 @@ JFrameBufferObject::JFrameBufferObject()
 	bufferID = -1;//Any glGen* function would return ID of 0. 0 is for only special use.
 
 	colorTex = NULL;
-	depthRBO = 0;
+	depthTex = NULL;
 	positionTex = NULL;
 	normalTex = NULL;
 	texTex = NULL;
@@ -419,19 +419,27 @@ int JFrameBufferObject::reset( int jfbo_brushes, GLsizei aWidth, GLsizei aHeight
 		}
 		if( (jfbo_brushes & BRUSH_DEPTH) )
 		{
+			depthTex = new JTextureObject();
+			result = JTextureManager::Inst()->makeTexture( *depthTex, aWidth, aHeight, JTEXTUREKIND_DEPTH );
+			if( result != 0 )
+				throw;
 
-			glGenRenderbuffers(1, &depthRBO);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex->bufID, 0);
+			/*glGenRenderbuffers(1, &depthRBO);
 			glBindRenderbuffer(GL_RENDERBUFFER, depthRBO);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, aWidth, aHeight);
 			glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRBO);
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRBO);*/
 		}
-		else if( !(jfbo_brushes & BRUSH_DEPTH) && depthRBO == 0 )
+		else if( !(jfbo_brushes & BRUSH_DEPTH) )
 		{
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
-			depthRBO = 0;
+			if(depthTex)
+				JTextureManager::Inst()->deleteTexture( *depthTex );
+			//TODO  detach
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
+			depthTex = NULL;
+			/*glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
+			depthRBO = 0;*/
 		}
 	/*
 		The width and height of framebuffer-attachable image must be not zero.

@@ -36,7 +36,7 @@ public:
 	JTextureObject* positionTex;
 	JTextureObject* normalTex;
 	JTextureObject* texTex;
-	GLuint depthRBO;
+	JTextureObject* depthTex;
 
 	GLuint stencilID;
 
