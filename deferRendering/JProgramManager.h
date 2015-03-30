@@ -9,7 +9,7 @@
 
 #include "JTextureManager.h"
 
-enum JShaderKinds{JSHADERKIND_DEFERRED, JSHADERKIND_TEXUNLIT, JSHADERKIND_DIFFUSE, JSHADERKIND_DIRSHADOW};
+enum JShaderKinds{JSHADERKIND_DEFERRED, JSHADERKIND_TEXUNLIT, JSHADERKIND_DIFFUSE, JSHADERKIND_DIRSHADOW, JSHADERKIND_FINALDEFERRED};
 
 using namespace std;
 
@@ -68,6 +68,22 @@ public:
 	}
 };
 
+class shaderInfo_FinalDeferred : public shaderInfo
+{
+public:
+	unsigned int lLightDir;
+	unsigned int lDiffuseMap;
+	unsigned int lNormalMap;
+	unsigned int lPositionMap;
+	unsigned int lTextureMap;
+	unsigned int lShadowMap;
+	unsigned int lEyePos;
+	shaderInfo_FinalDeferred()
+	{
+		shaderKind = JSHADERKIND_FINALDEFERRED;
+	}
+};
+
 typedef std::map<string, shaderInfo*> mapProgram;
 
 class JFrameBufferObject;
@@ -100,6 +116,9 @@ public:
 
 		shaderInfo_DirShadow* setProgram_DirShadow(const string& name, char* vpath, char* fpath);
 		int setUniformVariables_DirShadow( JMatrix44 mvp );
+
+		shaderInfo_FinalDeferred* setProgram_FinalDeferred(const string& name, char* vpath, char* fpath);
+		int setUniformVariables_FinalDeferred( JMatrix44 mvp, JVector3 eyepos, JVector3 lightDir, JTextureObject* diffuseMap, JTextureObject* normalMap, JTextureObject* positionMap, JTextureObject* textureMap, JTextureObject* shadowMap );
 
 		JProgramManager(){};
 

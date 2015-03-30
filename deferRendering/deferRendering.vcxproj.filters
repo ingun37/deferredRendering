@@ -51,6 +51,9 @@
     <ClCompile Include="JMaterial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="JGlobalVariables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JMesh.h">
@@ -83,6 +86,9 @@
     <ClInclude Include="JProgramManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="JGlobalVariables.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="diffuse.vert">
@@ -107,6 +113,12 @@
       <Filter>shader</Filter>
     </None>
     <None Include="dirShadow.vert">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="finalDeferred.vert">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="finalDeferred.frag">
       <Filter>shader</Filter>
     </None>
   </ItemGroup>

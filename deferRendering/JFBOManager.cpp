@@ -360,7 +360,7 @@ int JFrameBufferObject::reset( int jfbo_brushes, GLsizei aWidth, GLsizei aHeight
 		{
 			//TODO : delete existing textures
 			positionTex = new JTextureObject();
-			result = JTextureManager::Inst()->makeTexture( *positionTex, aWidth, aHeight, JTEXTUREKIND_COLOR );
+			result = JTextureManager::Inst()->makeTexture( *positionTex, aWidth, aHeight, JTEXTUREKIND_VECTOR );
 			if( result != 0 )
 				throw;
 
@@ -380,7 +380,7 @@ int JFrameBufferObject::reset( int jfbo_brushes, GLsizei aWidth, GLsizei aHeight
 		{
 			//TODO : delete existing textures
 			normalTex = new JTextureObject();
-			result = JTextureManager::Inst()->makeTexture( *normalTex, aWidth, aHeight, JTEXTUREKIND_COLOR );
+			result = JTextureManager::Inst()->makeTexture( *normalTex, aWidth, aHeight, JTEXTUREKIND_VECTOR );
 			if( result != 0 )
 				throw;
 
