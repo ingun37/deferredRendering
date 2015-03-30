@@ -83,6 +83,7 @@
   <ItemGroup>
     <ClCompile Include="JCamera.cpp" />
     <ClCompile Include="JFBOManager.cpp" />
+    <ClCompile Include="JGlobalVariables.cpp" />
     <ClCompile Include="JLevel.cpp" />
     <ClCompile Include="JLinearAlgebra.cpp" />
     <ClCompile Include="JMaterial.cpp" />
@@ -96,6 +97,7 @@
   <ItemGroup>
     <ClInclude Include="JCamera.h" />
     <ClInclude Include="JFBOManager.h" />
+    <ClInclude Include="JGlobalVariables.h" />
     <ClInclude Include="JLevel.h" />
     <ClInclude Include="JMaterial.h" />
     <ClInclude Include="JProgramManager.h" />
@@ -108,6 +110,8 @@
   <ItemGroup>
     <None Include="deferred.frag" />
     <None Include="deferred.vert" />
+    <None Include="finalDeferred.frag" />
+    <None Include="finalDeferred.vert" />
     <None Include="diffuse.frag" />
     <None Include="diffuse.vert" />
     <None Include="dirShadow.frag" />

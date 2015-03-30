@@ -4,14 +4,18 @@ JTextureObject::JTextureObject()
 {
 	bufID = -1;
 }
-static GLubyte imginfos[640*480*4];
-int JTextureManager::makeTexture( JTextureObject& texObj, GLsizei width, GLsizei height, JTEXTURE_KINDS kind, bool fillWithRandomColor )
+
+int JTextureManager::makeTexture( JTextureObject& texObj, GLsizei width, GLsizei height, JTEXTURE_KINDS kind )
 {
 	GLuint textureID;
 	int internalFormat;
 	int justFormat;
 	switch( kind )
 	{
+	case JTEXTUREKIND_VECTOR:
+		internalFormat = GL_RGBA32F;
+		justFormat = GL_RGBA;
+		break;
 	case JTEXTUREKIND_COLOR:
 		internalFormat = GL_RGBA8;
 		justFormat = GL_RGBA;
@@ -35,39 +39,15 @@ int JTextureManager::makeTexture( JTextureObject& texObj, GLsizei width, GLsizei
 	}
 
 	glGenTextures(1,&textureID);
-	if(glGetError() != GL_NO_ERROR)
-	{
-		fillWithRandomColor = fillWithRandomColor;
-	}
+	
 	glBindTexture(GL_TEXTURE_2D, textureID);
 
-	if(glGetError() != GL_NO_ERROR)
-	{
-		fillWithRandomColor = fillWithRandomColor;
-	}
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-	if( fillWithRandomColor && kind == JTEXTUREKIND_COLOR )
-	{
-		
-		glTexImage2D(GL_TEXTURE_2D,0,internalFormat,width,height,0,justFormat,GL_UNSIGNED_BYTE,randomPixelDatas);
-		if(int theerror = glGetError())
-		{
-			fillWithRandomColor = fillWithRandomColor;
-		}
-		delete [] randomPixelDatas;
-	}
-	else
-	{
-		glTexStorage2D(GL_TEXTURE_2D,1,internalFormat,width,height);
-	}
-
+	
+	glTexStorage2D(GL_TEXTURE_2D,1,internalFormat,width,height);
+	
 	glBindTexture(GL_TEXTURE_2D, 0);
-	GLenum err = glGetError();
-	if(err != GL_NO_ERROR)
-	{
-		err = err;
-	}
 	
 	JTextureObject* tObj = new JTextureObject();
 	tObj->bufID = textureID;

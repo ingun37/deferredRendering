@@ -386,3 +386,71 @@ int JProgramManager::setUniformVariables_DirShadow( JMatrix44 mvp )
 
 	return 0;
 }
+
+//////////////////////////////
+//---------------------shadow
+//////////////////////////////
+shaderInfo_FinalDeferred* JProgramManager::setProgram_FinalDeferred(const string& name, char* vpath, char* fpath)
+{
+	shaderInfo_FinalDeferred* info = new shaderInfo_FinalDeferred();
+
+	if(makeVertexShader(vpath,NULL, info->v) != 0)
+		return NULL;
+	if(makeFragmentShader(fpath,NULL, info->f) != 0)
+		return NULL;
+	if(makeProgram(info->v, info->f, info->p) != 0)
+		return NULL;
+
+
+	info->lmvp = 4;
+	info->lLightDir = 5;
+	info->lDiffuseMap = 6;
+	info->lNormalMap = 7;
+	info->lPositionMap = 8;
+	info->lTextureMap = 9;
+	info->lShadowMap = 10;
+	info->lEyePos = 11;
+
+	if(info->p > 0)
+	{
+		programs[name] = info;
+		info->name = name;
+	}
+
+	return info;
+}
+
+int JProgramManager::setUniformVariables_FinalDeferred( JMatrix44 mvp, JVector3 eyepos, JVector3 lightDir, JTextureObject* diffuseMap, JTextureObject* normalMap, JTextureObject* positionMap, JTextureObject* textureMap, JTextureObject* shadowMap )
+{
+	if(JProgramManager::currentlyRunningInfo->shaderKind != JSHADERKIND_FINALDEFERRED)
+		return -1;
+
+	shaderInfo_FinalDeferred* shaderinfo = (shaderInfo_FinalDeferred*)JProgramManager::currentlyRunningInfo;
+	
+
+	glUniformMatrix4fv(shaderinfo->lmvp, 1, GL_TRUE, (GLfloat*)(&mvp));
+	glUniform4f( shaderinfo->lLightDir, lightDir[0], lightDir[1], lightDir[2], 0 );
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, diffuseMap->bufID );
+	glUniform1i(shaderinfo->lDiffuseMap,0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, normalMap->bufID );
+	glUniform1i(shaderinfo->lNormalMap,1);
+
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, positionMap->bufID );
+	glUniform1i(shaderinfo->lPositionMap,2);
+
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, textureMap->bufID );
+	glUniform1i(shaderinfo->lTextureMap,3);
+
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, shadowMap->bufID );
+	glUniform1i(shaderinfo->lShadowMap,4);
+
+	glUniform4f( shaderinfo->lEyePos, eyepos[0], eyepos[1], eyepos[2], 0 );
+	return 0;
+}

@@ -1,7 +1,7 @@
 #include "JLevel.h"
 #include "JProgramManager.h"
 #include "JFBOManager.h"
-
+#include "JGlobalVariables.h"
 int JLevel::pushMesh( JMesh* pMesh )
 {
 	if(pMesh)
@@ -166,7 +166,14 @@ int JLevel::draw()
 							uniformVariableSetsuccess = false;
 
 						break;
-					case JSHADERKIND_DEFERRED: //in this case, it is meant to not to be here.
+					case JSHADERKIND_FINALDEFERRED:
+						if(material->extexObj1&&material->extexObj2&&material->extexObj3&&material->extexObj4&&material->extexObj5)
+						{
+							JProgramManager::Inst()->setUniformVariables_FinalDeferred(mP * mV * mM, JGlobalVariables::gWorldCameraEyePos, JGlobalVariables::gSunlightDir, material->extexObj1, material->extexObj2, material->extexObj3, material->extexObj4, material->extexObj5 );
+						}
+						else
+							uniformVariableSetsuccess = false;
+						break;
 					default:
 						uniformVariableSetsuccess = false;
 						break;

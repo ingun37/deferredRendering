@@ -11,7 +11,15 @@ class JMaterial
 {
 public:
 	JTextureObject* texObj;
+
+	JTextureObject* extexObj1;
+	JTextureObject* extexObj2;
+	JTextureObject* extexObj3;
+	JTextureObject* extexObj4;
+	JTextureObject* extexObj5;
+
 	shaderInfo* shaderinfo;
+
 	JMaterial();
 };
 
