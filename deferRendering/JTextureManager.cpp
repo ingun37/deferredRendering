@@ -87,9 +87,9 @@ int JTextureManager::makeTexture(JTextureObject& texObj, JTEXTURE_IMAGEFORMAT im
 		fread(data, sizeof(unsigned char), row_padded, f);
 		for(int j = 0; j < width*3; j += 3)
 		{
-			texData[i*(width*4) + 4*j/3 + 0] = data[j];
+			texData[i*(width*4) + 4*j/3 + 0] = data[j+2];
 			texData[i*(width*4) + 4*j/3 + 1] = data[j+1];
-			texData[i*(width*4) + 4*j/3 + 2] = data[j+2];
+			texData[i*(width*4) + 4*j/3 + 2] = data[j+0];
 			texData[i*(width*4) + 4*j/3 + 3] = 255;
 		}
 	}

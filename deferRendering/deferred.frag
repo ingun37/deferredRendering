@@ -36,7 +36,7 @@ void main(void)
 	depthFromShadowTex = texture2D( shadowTex, shadowMapUV ).x;
 
 	shadow = vec4(0,0,0,1);
-	if(abs(	depthFromShadowTex - depthFromShadowPV) < 0.001)
+	if(	depthFromShadowTex > depthFromShadowPV - 0.005)
 		shadow = vec4(1,1,1,1);
 		
 
