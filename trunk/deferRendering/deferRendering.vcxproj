@@ -110,6 +110,8 @@
     <None Include="deferred.vert" />
     <None Include="diffuse.frag" />
     <None Include="diffuse.vert" />
+    <None Include="dirShadow.frag" />
+    <None Include="dirShadow.vert" />
     <None Include="texunlit.frag" />
     <None Include="texunlit.vert" />
   </ItemGroup>

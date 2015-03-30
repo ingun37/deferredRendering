@@ -4,10 +4,6 @@
 #include <iostream>
 #include <sstream>
 
-
-
-
-
 ///////////////////////////////////////////////////////////////////////////////
 // convert OpenGL internal format enum to string
 ///////////////////////////////////////////////////////////////////////////////
@@ -313,6 +309,7 @@ JFrameBufferObject::JFrameBufferObject()
 	positionTex = NULL;
 	normalTex = NULL;
 	texTex = NULL;
+	shadowTex = NULL;
 	stencilID = 0;
 }
 
@@ -398,6 +395,7 @@ int JFrameBufferObject::reset( int jfbo_brushes, GLsizei aWidth, GLsizei aHeight
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, 0, 0);
 			normalTex = NULL;
 		}
+		//----------------------------------------------------
 		if( (jfbo_brushes & BRUSH_TEX) )
 		{
 			//TODO : delete existing textures
@@ -416,6 +414,26 @@ int JFrameBufferObject::reset( int jfbo_brushes, GLsizei aWidth, GLsizei aHeight
 			//TODO  detach
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, 0, 0);
 			texTex = NULL;
+		}
+		//----------------------------------------------------
+		if( (jfbo_brushes & BRUSH_SHADOW) )
+		{
+			//TODO : delete existing textures
+			shadowTex = new JTextureObject();
+			result = JTextureManager::Inst()->makeTexture( *shadowTex, aWidth, aHeight, JTEXTUREKIND_COLOR );
+			if( result != 0 )
+				throw;
+
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, shadowTex->bufID, 0);
+
+		}
+		else if( !(jfbo_brushes & BRUSH_SHADOW) )
+		{
+			if(shadowTex)
+				JTextureManager::Inst()->deleteTexture( *shadowTex );
+			//TODO  detach
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, 0, 0);
+			shadowTex = NULL;
 		}
 		if( (jfbo_brushes & BRUSH_DEPTH) )
 		{
@@ -518,6 +536,11 @@ int JFrameBufferObject::setOutputDrawBuffer()
 		drawBuffers[attachmentCnt] = GL_COLOR_ATTACHMENT3;
 		attachmentCnt++;
 	}
+	if( brushes & JFBO_BRUSHES::BRUSH_SHADOW)
+	{
+		drawBuffers[attachmentCnt] = GL_COLOR_ATTACHMENT4;
+		attachmentCnt++;
+	}
 	/*NO!!! dont use depth componenent as output drawbuffer
 	if( brushes & JFBO_BRUSHES::BRUSH_DEPTH)
 	{
@@ -541,7 +564,7 @@ JTextureObject* JFrameBufferObject::getTextureObjectOfCanvas( JFBO_BRUSHES which
 		return colorTex;
 		break;
 	case BRUSH_DEPTH:
-		return NULL;
+		return depthTex;
 		break;
 	case BRUSH_POSITION:
 		return positionTex;
@@ -551,6 +574,9 @@ JTextureObject* JFrameBufferObject::getTextureObjectOfCanvas( JFBO_BRUSHES which
 		break;
 	case BRUSH_TEX:
 		return texTex;
+		break;
+	case BRUSH_SHADOW:
+		return shadowTex;
 		break;
 	}
 	return NULL;

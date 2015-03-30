@@ -103,5 +103,11 @@
     <None Include="texunlit.vert">
       <Filter>shader</Filter>
     </None>
+    <None Include="dirShadow.frag">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="dirShadow.vert">
+      <Filter>shader</Filter>
+    </None>
   </ItemGroup>
 </Project>

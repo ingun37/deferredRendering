@@ -24,12 +24,43 @@ int JLevel::pushCamera( JCamera* pCamera )
 
 JLevel::JLevel()
 {
-	
+	shadowCamera = NULL;
+	shadowShader = NULL;
 }
 
 //after this, textures attached to fbo would be filled.
 int JLevel::draw()
 {
+	JFrameBufferObject *shadowFBO = NULL;
+	JMatrix44 shadowPV;
+	if( shadowCamera && shadowShader)
+	{
+		shadowFBO = shadowCamera->targetFBO;
+
+		shadowPV = shadowCamera->proj * shadowCamera->view;
+		if(shadowFBO)
+		{
+			shadowFBO->bind();
+			shadowFBO->setOutputDrawBuffer();
+
+			JProgramManager::Inst()->useProgram( shadowShader );
+
+			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+
+			for( unsigned int mi = 0;mi<meshes.size();mi++)
+			{
+				JMesh* mesh = meshes[mi];
+				if(mesh->material && mesh->material->shaderinfo)
+				{
+					JMatrix44 mM = JMatrix44::GetTranslationMatrix( mesh->position[0], mesh->position[1], mesh->position[2] );
+					JProgramManager::Inst()->setUniformVariables_DirShadow(shadowPV* mM);
+					mesh->draw();
+				}
+			}
+			shadowFBO->unbind();
+		}
+	}
+
 	for( unsigned int ci=0 ; ci<cameras.size() ; ci++ )
 	{
 		JCamera* camera = cameras[ci];
@@ -79,7 +110,7 @@ int JLevel::draw()
 
 						break;
 					case JSHADERKIND_DEFERRED:
-						JProgramManager::Inst()->setUniformVariables_Deferred( mP * mV * mM, material->texObj );
+						JProgramManager::Inst()->setUniformVariables_Deferred( mP * mV * mM, material->texObj, shadowPV, shadowFBO?shadowFBO->depthTex : NULL, mM );
 						break;
 					default:
 						uniformVariableSetsuccess = false;

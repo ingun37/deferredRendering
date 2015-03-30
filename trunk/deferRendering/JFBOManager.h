@@ -19,8 +19,9 @@ enum JFBO_BRUSHES
 	BRUSH_POSITION = 2,
 	BRUSH_NORMAL = 4,
 	BRUSH_TEX = 8,
-	BRUSH_DEPTH = 16,
-	BRUSH_STENCIL = 32
+	BRUSH_SHADOW = 16,
+	BRUSH_DEPTH = 32,
+	BRUSH_STENCIL = 64
 };
 
 
@@ -36,6 +37,7 @@ public:
 	JTextureObject* positionTex;
 	JTextureObject* normalTex;
 	JTextureObject* texTex;
+	JTextureObject* shadowTex;
 	JTextureObject* depthTex;
 
 	GLuint stencilID;
