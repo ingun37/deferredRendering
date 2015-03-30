@@ -175,48 +175,6 @@ int JProgramManager::useProgram(const shaderInfo* sInfo)
 	return 0;
 }
 
-int JProgramManager::setOutputDrawBuffer( JFrameBufferObject* fbo )
-{
-	if( !fbo )
-	{
-		GLenum defaultBuffer = GL_NONE;
-		glDrawBuffers( 1, &defaultBuffer );
-		return 0;
-	}
-	//according to https://www.opengl.org/wiki/Framebuffer_Object ...
-	//The minimum value for this is 8, so you are guaranteed to be able to have at least color attachments 0-7
-
-	/*
-	least number of drawBuffers is 8 (according to above.. )
-	*/
-	GLenum drawBuffers[] = {
-		GL_COLOR_ATTACHMENT0,
-		GL_COLOR_ATTACHMENT1,
-		GL_COLOR_ATTACHMENT2,
-		GL_COLOR_ATTACHMENT3,
-		GL_COLOR_ATTACHMENT4,
-		GL_COLOR_ATTACHMENT5,
-		GL_COLOR_ATTACHMENT6,
-		GL_COLOR_ATTACHMENT7,
-	};
-
-	int attachmentCnt = 0;
-
-	if(fbo->brushes & JFBO_BRUSHES::BRUSH_DEPTH)
-		attachmentCnt++;
-	if(fbo->brushes & JFBO_BRUSHES::BRUSH_DIFFUSE)
-		attachmentCnt++;
-	if(fbo->brushes & JFBO_BRUSHES::BRUSH_STENCIL)
-		attachmentCnt++;
-	
-	if( attachmentCnt==0 )
-		return -1;
-
-	glDrawBuffers( attachmentCnt, drawBuffers );
-
-	return 0;
-}
-
 int JProgramManager::useProgram_Deferred()
 {
 	//TODO
@@ -240,6 +198,9 @@ shaderInfo_Deferred* JProgramManager::setProgram_Deferred(const string& name, ch
 
 	info->lmvp = 4;
 	info->ltex = 5;
+	info->lShadowPV = 6;
+	info->lShadowTex = 7;
+	info->lTrans = 8;
 
 	if(info->p > 0)
 		programs[name] = info;
@@ -247,7 +208,7 @@ shaderInfo_Deferred* JProgramManager::setProgram_Deferred(const string& name, ch
 	return info;
 }
 
-int JProgramManager::setUniformVariables_Deferred( JMatrix44 mvp, JTextureObject* aTex )
+int JProgramManager::setUniformVariables_Deferred( JMatrix44 mvp, JTextureObject* aTex,JMatrix44& shadowPV, JTextureObject* shadowTex, JMatrix44& trans )
 {
 	if(JProgramManager::currentlyRunningInfo->shaderKind != JSHADERKIND_DEFERRED)
 		return -1;
@@ -255,10 +216,19 @@ int JProgramManager::setUniformVariables_Deferred( JMatrix44 mvp, JTextureObject
 	shaderInfo_Deferred* shaderinfo = (shaderInfo_Deferred*)JProgramManager::currentlyRunningInfo;
 
 	glUniformMatrix4fv( shaderinfo->lmvp, 1, GL_TRUE, &mvp[0][0] );
+	glUniformMatrix4fv( shaderinfo->lShadowPV, 1, GL_TRUE, &shadowPV[0][0] );
+	glUniformMatrix4fv( shaderinfo->lTrans, 1, GL_TRUE, &trans[0][0]);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, aTex->bufID );
 	glUniform1i(shaderinfo->ltex,0);
+
+	if( shadowTex )
+	{
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, shadowTex->bufID );
+		glUniform1i(shaderinfo->lShadowTex,1);
+	}
 	return 0;
 }
 
@@ -372,6 +342,46 @@ int JProgramManager::setUniformVariables_Diffuse( JMatrix44 mvp )
 	glBufferData(GL_UNIFORM_BUFFER, shaderinfo->uniformBlockSize, shaderinfo->buffer, GL_DYNAMIC_DRAW);
 */
 
+	glUniformMatrix4fv(shaderinfo->lmvp, 1, GL_TRUE, (GLfloat*)(&mvp));
+
+	return 0;
+}
+
+
+//////////////////////////////
+//---------------------shadow
+//////////////////////////////
+shaderInfo_DirShadow* JProgramManager::setProgram_DirShadow(const string& name, char* vpath, char* fpath)
+{
+	shaderInfo_DirShadow* info = new shaderInfo_DirShadow();
+
+	if(makeVertexShader(vpath,NULL, info->v) != 0)
+		return NULL;
+	if(makeFragmentShader(fpath,NULL, info->f) != 0)
+		return NULL;
+	if(makeProgram(info->v, info->f, info->p) != 0)
+		return NULL;
+
+
+	info->lmvp = 4;
+
+	if(info->p > 0)
+	{
+		programs[name] = info;
+		info->name = name;
+	}
+
+	return info;
+}
+
+int JProgramManager::setUniformVariables_DirShadow( JMatrix44 mvp )
+{
+	if(JProgramManager::currentlyRunningInfo->shaderKind != JSHADERKIND_DIRSHADOW)
+		return -1;
+
+	shaderInfo_DirShadow* shaderinfo = (shaderInfo_DirShadow*)JProgramManager::currentlyRunningInfo;
+	
+	
 	glUniformMatrix4fv(shaderinfo->lmvp, 1, GL_TRUE, (GLfloat*)(&mvp));
 
 	return 0;

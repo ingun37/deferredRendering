@@ -14,7 +14,8 @@ class JLevel
 public:
 	vector<JMesh*> meshes;
 	vector<JCamera*> cameras;
-
+	JCamera* shadowCamera;
+	shaderInfo_DirShadow* shadowShader;
 	int draw();
 
 	

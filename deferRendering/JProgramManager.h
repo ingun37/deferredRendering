@@ -9,7 +9,7 @@
 
 #include "JTextureManager.h"
 
-enum JShaderKinds{JSHADERKIND_DEFERRED, JSHADERKIND_TEXUNLIT, JSHADERKIND_DIFFUSE};
+enum JShaderKinds{JSHADERKIND_DEFERRED, JSHADERKIND_TEXUNLIT, JSHADERKIND_DIFFUSE, JSHADERKIND_DIRSHADOW};
 
 using namespace std;
 
@@ -29,7 +29,10 @@ public:
 class shaderInfo_Deferred : public shaderInfo
 { 
 public:
+	unsigned int lTrans;
 	unsigned int ltex;
+	unsigned int lShadowPV;
+	unsigned int lShadowTex;
 	shaderInfo_Deferred()
 	{
 		//TODO set shaderkind to JShader_Deferred
@@ -56,6 +59,15 @@ public:
 	}
 };
 
+class shaderInfo_DirShadow : public shaderInfo
+{
+public:
+	shaderInfo_DirShadow()
+	{
+		shaderKind = JSHADERKIND_DIRSHADOW;
+	}
+};
+
 typedef std::map<string, shaderInfo*> mapProgram;
 
 class JFrameBufferObject;
@@ -76,16 +88,18 @@ public:
 		int useProgram(const shaderInfo* aShaderInfo);
 		int useProgram_Deferred();
 
-		int setOutputDrawBuffer( JFrameBufferObject* fbo );
 
 		shaderInfo_Deferred* setProgram_Deferred(const string& name, char* vpath, char* fpath);
-		int setUniformVariables_Deferred( JMatrix44 mvp, JTextureObject* tex );
+		int setUniformVariables_Deferred( JMatrix44 mvp, JTextureObject* tex,JMatrix44& shadowPV, JTextureObject* shadowTex, JMatrix44& trans );
 		
 		shaderInfo_TexUnlit* setProgram_TexUnlit(const string& name, char* vpath, char* fpath);
 		int setUniformVariables_TexUnlit( JMatrix44 mvp, JTextureObject* aTex );
 
 		shaderInfo_Diffuse* setProgram_Diffuse(const string& name, char* vpath, char* fpath);
 		int setUniformVariables_Diffuse( JMatrix44 mvp );
+
+		shaderInfo_DirShadow* setProgram_DirShadow(const string& name, char* vpath, char* fpath);
+		int setUniformVariables_DirShadow( JMatrix44 mvp );
 
 		JProgramManager(){};
 

@@ -1,7 +1,7 @@
 #version 430 core
 
 layout (location = 4) uniform mat4 mvp;
-
+layout (location = 8) uniform mat4 trans;
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 uv;
@@ -21,7 +21,7 @@ void main(void)
 {
 	gl_Position = mvp * vec4(position,1);
 	vs_out.color = diffuse;
-	vs_out.position = position;
+	vs_out.position = (trans * vec4(position,1)).xyz;
 	vs_out.normal = normal;
 	vs_out.uv = uv;
 }
