@@ -21,6 +21,7 @@ using namespace std;
 JTextureObject* texCheck = NULL;
 JTextureObject* texWorldmap = NULL;
 JTextureObject* texBlock = NULL;
+JTextureObject* texPlanet2 = NULL;
 //---------shaders----------
 shaderInfo* shaderDiffusue = NULL;
 shaderInfo* shaderTexUnlit = NULL;
@@ -37,6 +38,7 @@ JMaterial *matTable = NULL;
 
 JMesh *obj1 = NULL;
 JMesh *obj2 = NULL;
+JMaterial *matObj2 = NULL;
 JMesh *obj3 = NULL;
 JMesh *obj4 = NULL;
 
@@ -75,7 +77,9 @@ int initTextures()
 	if( JTextureManager::Inst()->makeTexture( *texBlock,JTEXTURE_IMAGEFORMAT::JIMGFORMAT_BMP,"../deferRendering/block.bmp" ) == -1 )
 		return -1;
 
-
+	texPlanet2 = new JTextureObject();
+	if( JTextureManager::Inst()->makeTexture( *texPlanet2,JTEXTURE_IMAGEFORMAT::JIMGFORMAT_BMP,"../deferRendering/planet2.bmp" ) == -1 )
+		return -1;
 	return 0;
 }
 
@@ -109,6 +113,10 @@ int initMaterial()
 	matTable->texObj = texBlock;
 	matTable->shaderinfo = shaderDeferred;
 
+	matObj2 = new JMaterial();
+	matObj2->texObj = texPlanet2;
+	matObj2->shaderinfo = shaderDeferred;
+
 	finalMat = new JMaterial();
 	finalMat->shaderinfo = shaderFinalDeferred;
 
@@ -137,15 +145,11 @@ int initObjects()
 		return -1;
 	objTable->position[1] = -1;
 	objTable->material = matTable;
-	
-	obj1 = new JMesh();
 
 	unsigned int smoothness2 = 7;
 	float radius2 = 1;
-	
-	tmpNormal[0] = 0;
-	tmpNormal[1] = 0;
-	tmpNormal[2] = 1;
+
+	obj1 = new JMesh();
 	
 	if( makeSphere( radius2, smoothness2, *obj1 ) != 0 )
 	{
@@ -153,11 +157,24 @@ int initObjects()
 	}
 	if( obj1->refreshVBO() != 0 )
 		return -1;
-	//obj1->position[1] = 3;
+	obj1->position[2] = 1;
 
 	obj1->setMaterial(matDeferred);
 
+
+	obj2 = new JMesh();
+
+	if(makeSphere( 2, smoothness2, *obj2))
+		return -1;
+	if(obj2->refreshVBO() != 0)
+		return -1;
+	obj2->setMaterial(matObj2);
+	obj2->position[2] = -2;
+	obj2->position[0] = -1;
 	//-------------------screen------------------
+	tmpNormal[0] = 0;
+	tmpNormal[1] = 0;
+	tmpNormal[2] = 1;
 
 	screenQuad = new JMesh();
 	
@@ -255,6 +272,7 @@ int init()
 
 	worldLevel = new JLevel();
 	worldLevel->pushMesh( obj1 );
+	worldLevel->pushMesh( obj2 );
 	worldLevel->pushMesh( objTable );
 	worldLevel->pushCamera( worldCamera );
 	worldLevel->shadowCamera = shadowCamera;
