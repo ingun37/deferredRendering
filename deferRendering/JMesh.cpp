@@ -5,15 +5,13 @@ int JVBO::allocVBO( int aVertexNum, int aStructSize )
 	structSize = aStructSize;
 	vertexNum = aVertexNum;
 
-	void* dump;
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	dump = (void*)malloc(structSize * vertexNum);
-	glBufferData(GL_ARRAY_BUFFER, vertexNum * structSize, dump, GL_STATIC_DRAW);//TODO : check if dump i necessary
+	glBufferData(GL_ARRAY_BUFFER, vertexNum * structSize, NULL, GL_STATIC_DRAW);
 
 
 	/*
@@ -52,7 +50,6 @@ GL_DYNAMIC_COPY Buffer contents will be updated
 	drawing or copying to other images.
 
 */
-	free(dump);
 	glBindBuffer(GL_ARRAY_BUFFER,0);
 	//glBindBuffer(0);//asdf
 	glBindVertexArray(0);
@@ -216,3 +213,16 @@ int JMesh::clearGLBuffers()
 	return 0;
 }
 
+int JMesh::clearData()
+{
+	vertices.clear();
+	indices.clear();
+	return 0;
+}
+
+int JMesh::clearAll()
+{
+	clearData();
+	clearGLBuffers();
+	return 0;
+}

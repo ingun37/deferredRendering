@@ -55,6 +55,8 @@ public:
 	int draw();
 	
 	int clearGLBuffers();
+	int clearData();
+	int clearAll();
 };
 
 #endif

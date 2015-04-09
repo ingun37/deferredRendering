@@ -15,6 +15,8 @@ int makeSphere( float radius, unsigned int smoothness, JMesh& mesh )
 	unsigned long slicenum = sphereSliceNumForTex(smoothness);
 	unsigned long idxnum = sphereIndexNumForTex(smoothness);
 
+	mesh.clearAll();
+
 	JVertex* tmpvertices = new JVertex[pnum];
 	unsigned int *tmpIndices = new unsigned int[idxnum];
 
