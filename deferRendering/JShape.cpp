@@ -9,6 +9,8 @@
 #define sphereIndexNumForTex(S) (sphereFaceNumForTex(S)*3)
 #define PI 3.141592f
 
+JVertex vertexPool[ sphereVertexNumForTex(500) ];
+unsigned int indexPool[ sphereIndexNumForTex(500) ];
 int makeSphere( float radius, unsigned int smoothness, JMesh& mesh )
 {
 	unsigned long pnum = sphereVertexNumForTex(smoothness);
@@ -16,14 +18,17 @@ int makeSphere( float radius, unsigned int smoothness, JMesh& mesh )
 	unsigned long idxnum = sphereIndexNumForTex(smoothness);
 
 	mesh.clearAll();
+	mesh.reserveVertexLen(pnum);
+	mesh.reserveIndexLen(idxnum);
 
-	JVertex* tmpvertices = new JVertex[pnum];
-	unsigned int *tmpIndices = new unsigned int[idxnum];
+	JVertex* tmpvertices = vertexPool; //new JVertex[pnum]
+	unsigned int *tmpIndices = indexPool ;//new unsigned int[idxnum];
 
 	float tmpangle, tmpradius, tmpheight;
 
 	tmpangle = PI/(smoothness+1);
 
+	int cnt = 0;
 	try
 	{
 		for(unsigned int i=0;i<smoothness + 2;i++)
@@ -32,61 +37,64 @@ int makeSphere( float radius, unsigned int smoothness, JMesh& mesh )
 			tmpheight = cosf(tmpangle * i) * radius;
 			for(unsigned int j=0;j<slicenum;j++)
 			{
+				tmpvertices[cnt].position[0] = cosf(tmpangle * j) * tmpradius;
+				tmpvertices[cnt].position[1] = tmpheight;
+				tmpvertices[cnt].position[2] = sinf(tmpangle * j) * tmpradius;
 				
-				tmpvertices[i*slicenum + j].position[0] = cosf(tmpangle * j) * tmpradius;
-				tmpvertices[i*slicenum + j].position[1] = tmpheight;
-				tmpvertices[i*slicenum + j].position[2] = sinf(tmpangle * j) * tmpradius;
-				
+				tmpvertices[cnt].normal[0] = tmpvertices[cnt].position[0]/radius;
+				tmpvertices[cnt].normal[1] = tmpvertices[cnt].position[1]/radius;
+				tmpvertices[cnt].normal[2] = tmpvertices[cnt].position[2]/radius;
 						
-				tmpvertices[i*slicenum + j].normal[0] = tmpvertices[i*slicenum + j].position[0]/radius;
-				tmpvertices[i*slicenum + j].normal[1] = tmpvertices[i*slicenum + j].position[1]/radius;
-				tmpvertices[i*slicenum + j].normal[2] = tmpvertices[i*slicenum + j].position[2]/radius;
-				
-						
-				tmpvertices[i*slicenum + j].uv[0] = ((float)j)/(slicenum-1);
-				tmpvertices[i*slicenum + j].uv[1] = 1- ((float)i)/(smoothness+2-1);
+				tmpvertices[cnt].uv[0] = ((float)j)/(slicenum-1);
+				tmpvertices[cnt].uv[1] = 1- ((float)i)/(smoothness+2-1);
 
-				tmpvertices[i*slicenum + j].diffuse[0] = 0;
-				tmpvertices[i*slicenum + j].diffuse[1] = 1;
-				tmpvertices[i*slicenum + j].diffuse[2] = sinf(tmpangle * j);
-				tmpvertices[i*slicenum + j].diffuse[3] = 1;
+				tmpvertices[cnt].diffuse[0] = 0;
+				tmpvertices[cnt].diffuse[1] = 1;
+				tmpvertices[cnt].diffuse[2] = sinf(tmpangle * j);
+				tmpvertices[cnt].diffuse[3] = 1;
 
-				mesh.pushVertex( tmpvertices[ i*slicenum + j ] );
+				cnt++;
 			}
 		}
+
+		if(cnt != pnum)
+			puts("odd... not correct");
+		cnt = 0;
+
+		for(unsigned int i=0;i<pnum;i++)
+			mesh.pushVertex( tmpvertices[i] );
 
 		for(unsigned int i=0;i<smoothness+2-1;i++)
 		{
 			for(unsigned int j=0;j<slicenum-1;j++)
 			{
-					tmpIndices[6*(i*(slicenum-1)+j) + 0] = i * slicenum + j;
-					tmpIndices[6*(i*(slicenum-1)+j) + 1] = i * slicenum + (j+1);
-					tmpIndices[6*(i*(slicenum-1)+j) + 2] = (i+1) * slicenum + j;
-						
-					tmpIndices[6*(i*(slicenum-1)+j) + 3] = i * slicenum + j+1;
-					tmpIndices[6*(i*(slicenum-1)+j) + 4] = (i+1) * slicenum + (j+1);
-					tmpIndices[6*(i*(slicenum-1)+j) + 5] = (i+1) * slicenum + j;
+				tmpIndices[cnt + 0] = i * slicenum + j;
+				tmpIndices[cnt + 1] = i * slicenum + (j+1);
+				tmpIndices[cnt + 2] = (i+1) * slicenum + j;
+				tmpIndices[cnt + 3] = i * slicenum + j+1;
+				tmpIndices[cnt + 4] = (i+1) * slicenum + (j+1);
+				tmpIndices[cnt + 5] = (i+1) * slicenum + j;
+
+				cnt+=6;
 			}
 		}
+		if(cnt!=idxnum)
+			puts("odd... not correct");
+		cnt=0;
 
 		for(unsigned int i=0;i<idxnum;i++)
-		{
-			if( tmpIndices[i] >= pnum )
-				throw;
-
 			mesh.pushIndex( tmpIndices[i] );
-		}
 	}
 	catch(...)
 	{
 		puts(" make Sphere ");
-		delete tmpvertices;
-		delete tmpIndices;
+		//delete tmpvertices;
+		//delete tmpIndices;
 		return -1;
 	}
 	
-	delete [] tmpvertices;
-	delete [] tmpIndices;
+	//delete [] tmpvertices;
+	//delete [] tmpIndices;
 	return 0;
 }
 

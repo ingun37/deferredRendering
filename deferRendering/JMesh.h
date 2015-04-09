@@ -46,7 +46,9 @@ public:
 
 	JMesh();
 
+	int reserveVertexLen( const unsigned int len );
 	int pushVertex( const JVertex&  vertex);
+	int reserveIndexLen( const unsigned int len );
 	int pushIndex( const unsigned int index);
 	JMaterial* getMaterial();
 	int setMaterial( JMaterial* mat );

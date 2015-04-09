@@ -14,6 +14,9 @@
 #include <GLFW/glfw3.h>
 
 #include <string>
+
+#include <time.h>
+
 using namespace std;
 
 #define SAFE_DELETE(p) if(p){ delete (p); }
@@ -149,15 +152,18 @@ int initObjects()
 	objTable->position[1] = -1;
 	objTable->material = matTable;
 
-	unsigned int smoothness2 = 7;
+	unsigned int smoothness2 = 300;
 	float radius2 = 1;
 
 	obj1 = new JMesh();
 	
+	clock_t tmpT1 = clock();
 	if( makeSphere( radius2, smoothness2, *obj1 ) != 0 )
 	{
 		return -1;
 	}
+	tmpT1 = clock() - tmpT1;
+	printf("making sphere - %f sec\n",((float)tmpT1)/CLOCKS_PER_SEC);
 	if( obj1->refreshVertexIndexBuffer() != 0 )
 		return -1;
 	obj1->position[2] = 1;

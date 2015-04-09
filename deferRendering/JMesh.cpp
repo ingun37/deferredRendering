@@ -226,3 +226,15 @@ int JMesh::clearAll()
 	clearGLBuffers();
 	return 0;
 }
+
+int JMesh::reserveVertexLen(const unsigned int len)
+{
+	vertices.reserve( len );
+	return 0;
+}
+
+int JMesh::reserveIndexLen(const unsigned int len)
+{
+	indices.reserve( len );
+	return 0;
+}
