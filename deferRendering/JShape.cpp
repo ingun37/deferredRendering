@@ -48,6 +48,8 @@ int makeSphere( float radius, unsigned int smoothness, JMesh& mesh )
 				tmpvertices[i*slicenum + j].diffuse[1] = 1;
 				tmpvertices[i*slicenum + j].diffuse[2] = sinf(tmpangle * j);
 				tmpvertices[i*slicenum + j].diffuse[3] = 1;
+
+				mesh.pushVertex( tmpvertices[ i*slicenum + j ] );
 			}
 		}
 
@@ -70,7 +72,7 @@ int makeSphere( float radius, unsigned int smoothness, JMesh& mesh )
 			if( tmpIndices[i] >= pnum )
 				throw;
 
-			mesh.pushVertex( tmpvertices[ tmpIndices[i] ] );
+			mesh.pushIndex( tmpIndices[i] );
 		}
 	}
 	catch(...)
@@ -81,8 +83,8 @@ int makeSphere( float radius, unsigned int smoothness, JMesh& mesh )
 		return -1;
 	}
 	
-	delete tmpvertices;
-	delete tmpIndices;
+	delete [] tmpvertices;
+	delete [] tmpIndices;
 	return 0;
 }
 
@@ -140,6 +142,8 @@ int makePlane(float widthLen, float heightLen, unsigned int widthSeg, unsigned i
 
 			vertices[idx].uv[0] = ((float)j)/(widthvnum-1);
 			vertices[idx].uv[1] = ((float)i)/(heightvnum-1);
+
+			mesh.pushVertex( vertices[idx] );
 		}
 	}
 	unsigned int numIdx = widthSeg * heightSeg * 6;
@@ -179,7 +183,7 @@ int makePlane(float widthLen, float heightLen, unsigned int widthSeg, unsigned i
 			delete [] vertices;
 			return -1;
 		}
-		mesh.pushVertex( vertices[ indices[i] ] );
+		mesh.pushIndex( indices[i] );
 	}
 	delete [] indices;
 	delete [] vertices;

@@ -20,24 +20,36 @@ public:
 	JVBO();
 };
 
+class JIBO
+{
+public:
+	unsigned int ibo;
+	unsigned int indexNum;
+	int allocIBO( int aIndexNum );
+	int setIBO( unsigned int* data );
+	JIBO();
+};
+
 class JMesh
 {
 public:
 	int tag;
 	vector<JVertex> vertices;
-	
+	vector<unsigned int> indices;
 	JMaterial* material;
 	JVBO* jvbo;
+	JIBO* jibo;
 
 	JVector4 position;
 
 	JMesh();
 
 	int pushVertex( const JVertex&  vertex);
+	int pushIndex( const unsigned int index);
 	JMaterial* getMaterial();
 	int setMaterial( JMaterial* mat );
 	
-	int refreshVBO();
+	int refreshVertexIndexBuffer();
 	int draw();
 	
 };

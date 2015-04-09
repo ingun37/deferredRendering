@@ -144,7 +144,7 @@ int initObjects()
 	{
 		return -1;
 	}
-	if( objTable->refreshVBO() != 0 )
+	if( objTable->refreshVertexIndexBuffer() != 0 )
 		return -1;
 	objTable->position[1] = -1;
 	objTable->material = matTable;
@@ -158,7 +158,7 @@ int initObjects()
 	{
 		return -1;
 	}
-	if( obj1->refreshVBO() != 0 )
+	if( obj1->refreshVertexIndexBuffer() != 0 )
 		return -1;
 	obj1->position[2] = 1;
 
@@ -169,7 +169,7 @@ int initObjects()
 
 	if(makeSphere( 2, smoothness2, *obj2))
 		return -1;
-	if(obj2->refreshVBO() != 0)
+	if(obj2->refreshVertexIndexBuffer() != 0)
 		return -1;
 	obj2->setMaterial(matObj2);
 	obj2->position[2] = -2;
@@ -185,7 +185,7 @@ int initObjects()
 	{
 		return -1;
 	}
-	if( screenQuad->refreshVBO() != 0 )
+	if( screenQuad->refreshVertexIndexBuffer() != 0 )
 		return -1;
 
 	matTexUnlit->texObj = deferredFBO->getTextureObjectOfCanvas( BRUSH_DIFFUSE );
