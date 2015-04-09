@@ -17,7 +17,8 @@ public:
 	unsigned int vertexNum;
 	int allocVBO( int aVertexNum, int aStructSize );
 	int setVBO( void* data );
-	JVBO();
+	int clear();
+	JVBO():vbo(0),vao(0),structSize(0),vertexNum(0){};
 };
 
 class JIBO
@@ -27,7 +28,8 @@ public:
 	unsigned int indexNum;
 	int allocIBO( int aIndexNum );
 	int setIBO( unsigned int* data );
-	JIBO();
+	int clear();
+	JIBO():ibo(0),indexNum(0){};
 };
 
 class JMesh
@@ -37,8 +39,8 @@ public:
 	vector<JVertex> vertices;
 	vector<unsigned int> indices;
 	JMaterial* material;
-	JVBO* jvbo;
-	JIBO* jibo;
+	JVBO jvbo;
+	JIBO jibo;
 
 	JVector4 position;
 
@@ -52,6 +54,7 @@ public:
 	int refreshVertexIndexBuffer();
 	int draw();
 	
+	int clearGLBuffers();
 };
 
 #endif

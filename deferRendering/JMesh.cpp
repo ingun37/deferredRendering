@@ -1,10 +1,5 @@
 #include "JMesh.h"
 
-JVBO::JVBO()
-{
-	vbo = vao = structSize = vertexNum = 0;
-}
-
 int JVBO::allocVBO( int aVertexNum, int aStructSize )
 {
 	structSize = aStructSize;
@@ -58,7 +53,7 @@ GL_DYNAMIC_COPY Buffer contents will be updated
 
 */
 	free(dump);
-
+	glBindBuffer(GL_ARRAY_BUFFER,0);
 	//glBindBuffer(0);//asdf
 	glBindVertexArray(0);
 
@@ -99,9 +94,12 @@ int JVBO::setVBO( void* data )
 	return 0;
 }
 
-JIBO::JIBO()
+int JVBO::clear()
 {
-	ibo = indexNum = 0;
+	glDeleteVertexArrays(1,&vao);
+	glDeleteBuffers(1,&vbo);
+	vao = vbo = structSize = vertexNum = 0;
+	return 0;
 }
 
 int JIBO::allocIBO(int aIndexNum)
@@ -125,12 +123,16 @@ int JIBO::setIBO(unsigned int* data)
 	return 0;
 }
 
+int JIBO::clear()
+{
+	glDeleteBuffers(1,&ibo);
+	return 0;
+}
+
 
 JMesh::JMesh()
 {
 	material = NULL;
-	jvbo = NULL;
-	jibo = NULL;
 	tag = 0;
 	position[0] = 0;
 	position[1] = 0;
@@ -158,44 +160,40 @@ JMaterial* JMesh::getMaterial()
 int JMesh::refreshVertexIndexBuffer()
 {
 	int result;
-	if(jvbo == NULL)
-	{
-		jvbo = new JVBO();
-		result = jvbo->allocVBO( vertices.size(), sizeof(JVertex) );
-		if(result != 0)
-			return -1;
-	}
+	if( jvbo.vbo > 0 )
+		jvbo.clear();
 
-	result = jvbo->setVBO( &(vertices[0]) );
+	result = jvbo.allocVBO( vertices.size(), sizeof(JVertex) );
+	if(result != 0)
+		return -1;
+
+	result = jvbo.setVBO( &(vertices[0]) );
 
 	if(result != 0)
 		return -1;
 
-	if(jibo == NULL)
-	{
-		jibo = new JIBO();
-		result = jibo->allocIBO( indices.size() );
-		if(result != 0)
-			return -1;
-	}
+	if( jibo.ibo > 0 )
+		jibo.clear();
 
-	result = jibo->setIBO( &(indices[0]) );
+	result = jibo.allocIBO( indices.size() );
+	if(result != 0)
+		return -1;
+
+	result = jibo.setIBO( &(indices[0]) );
 
 	if(result != 0)
 		return -1;
 	
 	return 0;
-	
-	//TODO if number of vertex is different then realloc jvbo
 }
 
 int JMesh::draw()
 {
-	if( jvbo && jvbo->vao > 0 && jibo && jibo->ibo > 0 )
+	if( jvbo.vao > 0 && jibo.ibo > 0 )
 	{
-		glBindVertexArray(jvbo->vao);
+		glBindVertexArray(jvbo.vao);
 
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, jibo->ibo );
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, jibo.ibo );
 		glDrawElements( GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (void*)0 );
 		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 		//glDrawArrays(GL_TRIANGLES,0,jvbo->vertexNum);
@@ -208,6 +206,13 @@ int JMesh::draw()
 int JMesh::pushIndex(const unsigned int index)
 {
 	indices.push_back(index);
+	return 0;
+}
+
+int JMesh::clearGLBuffers()
+{
+	jibo.clear();
+	jvbo.clear();
 	return 0;
 }
 
