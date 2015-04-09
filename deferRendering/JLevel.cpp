@@ -22,10 +22,14 @@ int JLevel::pushCamera( JCamera* pCamera )
 	return -1;
 }
 
-JLevel::JLevel()
+JLevel::JLevel():shadowCamera(0),shadowShader(0),mngProg(0)
 {
-	shadowCamera = NULL;
-	shadowShader = NULL;
+}
+
+int JLevel::initJLevel( JProgramManager& argMngProg )
+{
+	mngProg = &argMngProg;
+	return 0;
 }
 
 //after this, textures attached to fbo would be filled.
@@ -43,7 +47,7 @@ int JLevel::draw()
 			shadowFBO->bind();
 			shadowFBO->setOutputDrawBuffer();
 
-			JProgramManager::Inst()->useProgram( shadowShader );
+			mngProg->useProgram( shadowShader );
 
 			glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
@@ -53,7 +57,7 @@ int JLevel::draw()
 				if(mesh->material && mesh->material->shaderinfo)
 				{
 					JMatrix44 mM = JMatrix44::GetTranslationMatrix( mesh->position[0], mesh->position[1], mesh->position[2] );
-					JProgramManager::Inst()->setUniformVariables_DirShadow(shadowPV* mM);
+					mngProg->setUniformVariables_DirShadow(shadowPV* mM);
 					mesh->draw();
 				}
 			}
@@ -84,9 +88,8 @@ int JLevel::draw()
 				{
 					JMaterial* material = mesh->material;
 					shaderInfo* sInfo = mesh->material->shaderinfo;
-					JProgramManager::Inst()->useProgram( sInfo );
+					mngProg->useProgram( sInfo );
 					
-
 					JMatrix44 mM = JMatrix44::GetTranslationMatrix( mesh->position[0], mesh->position[1], mesh->position[2] );
 
 					bool uniformVariableSetsuccess = true;
@@ -95,7 +98,7 @@ int JLevel::draw()
 					switch(sInfo->shaderKind)
 					{
 					case JSHADERKIND_DIFFUSE:
-						if( JProgramManager::Inst()->setUniformVariables_Diffuse(mP*mV*mM) != 0 )
+						if( mngProg->setUniformVariables_Diffuse(mP*mV*mM) != 0 )
 						{
 							uniformVariableSetsuccess = false;
 						}
@@ -103,14 +106,14 @@ int JLevel::draw()
 					case JSHADERKIND_TEXUNLIT:
 						if(material->texObj && material->texObj->bufID > 0)
 						{
-							JProgramManager::Inst()->setUniformVariables_TexUnlit(mP * mV * mM, material->texObj);
+							mngProg->setUniformVariables_TexUnlit(mP * mV * mM, material->texObj);
 						}
 						else
 							uniformVariableSetsuccess = false;
 
 						break;
 					case JSHADERKIND_DEFERRED:
-						JProgramManager::Inst()->setUniformVariables_Deferred( mP * mV * mM, material->texObj, shadowPV, shadowFBO?shadowFBO->depthTex : NULL, mM );
+						mngProg->setUniformVariables_Deferred( mP * mV * mM, material->texObj, shadowPV, shadowFBO?&(shadowFBO->depthTex) : NULL, mM );
 						break;
 					default:
 						uniformVariableSetsuccess = false;
@@ -141,7 +144,7 @@ int JLevel::draw()
 					if(currentShader!=sInfo)
 					{
 						currentShader = sInfo;
-						if( JProgramManager::Inst()->useProgram( currentShader ) != 0 )
+						if( mngProg->useProgram( currentShader ) != 0 )
 							break;
 					}
 
@@ -152,7 +155,7 @@ int JLevel::draw()
 					switch(currentShader->shaderKind)
 					{
 					case JSHADERKIND_DIFFUSE:
-						if( JProgramManager::Inst()->setUniformVariables_Diffuse(mP*mV*mM) != 0 )
+						if( mngProg->setUniformVariables_Diffuse(mP*mV*mM) != 0 )
 						{
 							uniformVariableSetsuccess = false;
 						}
@@ -160,7 +163,7 @@ int JLevel::draw()
 					case JSHADERKIND_TEXUNLIT:
 						if(material->texObj && material->texObj->bufID > 0)
 						{
-							JProgramManager::Inst()->setUniformVariables_TexUnlit(mP * mV * mM, material->texObj);
+							mngProg->setUniformVariables_TexUnlit(mP * mV * mM, material->texObj);
 						}
 						else
 							uniformVariableSetsuccess = false;
@@ -169,7 +172,7 @@ int JLevel::draw()
 					case JSHADERKIND_FINALDEFERRED:
 						if(material->extexObj1&&material->extexObj2&&material->extexObj3&&material->extexObj4&&material->extexObj5)
 						{
-							JProgramManager::Inst()->setUniformVariables_FinalDeferred(mP * mV * mM, JGlobalVariables::gWorldCameraEyePos, JGlobalVariables::gSunlightDir, material->extexObj1, material->extexObj2, material->extexObj3, material->extexObj4, material->extexObj5 );
+							mngProg->setUniformVariables_FinalDeferred(mP * mV * mM, JGlobalVariables::gWorldCameraEyePos, JGlobalVariables::gSunlightDir, material->extexObj1, material->extexObj2, material->extexObj3, material->extexObj4, material->extexObj5 );
 						}
 						else
 							uniformVariableSetsuccess = false;

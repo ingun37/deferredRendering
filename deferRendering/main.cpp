@@ -17,40 +17,49 @@
 using namespace std;
 
 #define SAFE_DELETE(p) if(p){ delete (p); }
+
+JTextureManager mngTex;
+JProgramManager mngProgram;
+JFBOManager mngFBO;
 //-------textures----------
-JTextureObject* texCheck = NULL;
-JTextureObject* texWorldmap = NULL;
-JTextureObject* texBlock = NULL;
-JTextureObject* texPlanet2 = NULL;
+JTextureObject texPool[16];
+JTextureObject* texCheck = &texPool[0];
+JTextureObject* texWorldmap = &texPool[1];
+JTextureObject* texBlock = &texPool[2];
+JTextureObject* texPlanet2 = &texPool[3];
 //---------shaders----------
-shaderInfo* shaderDiffusue = NULL;
-shaderInfo* shaderTexUnlit = NULL;
-shaderInfo* shaderDeferred = NULL;
-shaderInfo_DirShadow* shaderDirShadow = NULL;
-shaderInfo* shaderFinalDeferred = NULL;
+shaderInfo_Diffuse shaderDiffusue;
+shaderInfo_TexUnlit shaderTexUnlit;
+shaderInfo_Deferred shaderDeferred;
+shaderInfo_FinalDeferred shaderFinalDeferred;
+
+shaderInfo_DirShadow shaderDirShadow;
 //-------objectsLevel-------
-JMaterial* matTexUnlit = NULL;
-JMaterial* matDeferred = NULL;
-JMaterial* matDiffuse = NULL;
+JMaterial materialPool[16];
+JMaterial* matTexUnlit = &materialPool[0];
+JMaterial* matDeferred = &materialPool[1];
+JMaterial* matDiffuse = &materialPool[2];
+JMaterial *matTable = &materialPool[3];
+JMaterial *matObj2 = &materialPool[4];
+JMaterial *finalMat = &materialPool[5];
 
 JMesh *objTable = NULL;
-JMaterial *matTable = NULL;
-
 JMesh *obj1 = NULL;
 JMesh *obj2 = NULL;
-JMaterial *matObj2 = NULL;
 JMesh *obj3 = NULL;
 JMesh *obj4 = NULL;
 
-JFrameBufferObject* shadowFBO = NULL;
+
 JCamera* shadowCamera = NULL;
 JCamera* worldCamera;
 JLevel *worldLevel = NULL;
 
-JFrameBufferObject* deferredFBO = NULL;
+JFrameBufferObject fboPool[4];
+JFrameBufferObject* shadowFBO = &fboPool[0];
+JFrameBufferObject* deferredFBO = &fboPool[1];
 
 //------------screenLevel--------------
-JMaterial* finalMat = NULL;
+
 JMesh *screenQuad = NULL;
 
 JCamera* screenCamera = NULL;
@@ -59,66 +68,60 @@ JLevel *screenLevel = NULL;
 #define JScreenWidth 640
 #define JScreenHeight 480
 
+int initManagers()
+{
+	int err = 0;
+	err |= mngFBO.initFBOManager( mngTex );
+	//TODO : initmanagers
+	//mngTex.init
+	//mngProgram.init
+	return 0;
+}
 int initFBO()
 {
-	deferredFBO = JFBOManager::Inst()->makeCanvasWithAttribute( JFBO_BRUSHES::BRUSH_DEPTH | JFBO_BRUSHES::BRUSH_DIFFUSE | JFBO_BRUSHES::BRUSH_POSITION | JFBO_BRUSHES::BRUSH_NORMAL | JFBO_BRUSHES::BRUSH_TEX | JFBO_BRUSHES::BRUSH_SHADOW,JScreenWidth,JScreenHeight);
-
-	shadowFBO = JFBOManager::Inst()->makeCanvasWithAttribute( JFBO_BRUSHES::BRUSH_DEPTH , 640, 480);
-	return 0;
+	int err = 0;
+	err |= mngFBO.makeCanvasWithAttribute(*deferredFBO,JFBO_BRUSHES::BRUSH_DEPTH | JFBO_BRUSHES::BRUSH_DIFFUSE | JFBO_BRUSHES::BRUSH_POSITION | JFBO_BRUSHES::BRUSH_NORMAL | JFBO_BRUSHES::BRUSH_TEX | JFBO_BRUSHES::BRUSH_SHADOW,JScreenWidth,JScreenHeight);
+	err |= mngFBO.makeCanvasWithAttribute(*shadowFBO, JFBO_BRUSHES::BRUSH_DEPTH, 640, 480);
+	return err;
 }
 
 int initTextures()
 {
-	texWorldmap = new JTextureObject();
-	if( JTextureManager::Inst()->makeTexture( *texWorldmap,JTEXTURE_IMAGEFORMAT::JIMGFORMAT_BMP,"../deferRendering/earthtoon.bmp" ) == -1 )
-		return -1;
-
-	texBlock = new JTextureObject();
-	if( JTextureManager::Inst()->makeTexture( *texBlock,JTEXTURE_IMAGEFORMAT::JIMGFORMAT_BMP,"../deferRendering/block.bmp" ) == -1 )
-		return -1;
-
-	texPlanet2 = new JTextureObject();
-	if( JTextureManager::Inst()->makeTexture( *texPlanet2,JTEXTURE_IMAGEFORMAT::JIMGFORMAT_BMP,"../deferRendering/planet2.bmp" ) == -1 )
-		return -1;
-	return 0;
+	int err = 0;
+	err |= mngTex.makeTexture( *texWorldmap,JTEXTURE_IMAGEFORMAT::JIMGFORMAT_BMP,"../deferRendering/earthtoon.bmp" );
+	err |= mngTex.makeTexture( *texBlock,JTEXTURE_IMAGEFORMAT::JIMGFORMAT_BMP,"../deferRendering/block.bmp" );
+	err |= mngTex.makeTexture( *texPlanet2,JTEXTURE_IMAGEFORMAT::JIMGFORMAT_BMP,"../deferRendering/planet2.bmp" );
+	return err;
 }
 
 int initShaders()
 {
-	shaderDiffusue = JProgramManager::Inst()->setProgram_Diffuse("diffuse","../deferRendering/diffuse.vert","../deferRendering/diffuse.frag");
-	shaderTexUnlit = JProgramManager::Inst()->setProgram_TexUnlit("texunlit","../deferRendering/texunlit.vert","../deferRendering/texunlit.frag");
-	shaderDeferred = JProgramManager::Inst()->setProgram_Deferred("deferred","../deferRendering/deferred.vert","../deferRendering/deferred.frag");
-	shaderDirShadow = JProgramManager::Inst()->setProgram_DirShadow("dirshadow","../deferRendering/dirShadow.vert","../deferRendering/dirShadow.frag");
-	shaderFinalDeferred = JProgramManager::Inst()->setProgram_FinalDeferred("finaldeferred","../deferRendering/finalDeferred.vert","../deferRendering/finalDeferred.frag");
+	int err = 0;
+	err |= mngProgram.setProgram_Diffuse(shaderDiffusue,"diffuse","../deferRendering/diffuse.vert","../deferRendering/diffuse.frag");
+	err |= mngProgram.setProgram_TexUnlit(shaderTexUnlit,"texunlit","../deferRendering/texunlit.vert","../deferRendering/texunlit.frag");
+	err |= mngProgram.setProgram_Deferred(shaderDeferred,"deferred","../deferRendering/deferred.vert","../deferRendering/deferred.frag");
+	err |= mngProgram.setProgram_DirShadow(shaderDirShadow,"dirshadow","../deferRendering/dirShadow.vert","../deferRendering/dirShadow.frag");
+	err |= mngProgram.setProgram_FinalDeferred(shaderFinalDeferred,"finaldeferred","../deferRendering/finalDeferred.vert","../deferRendering/finalDeferred.frag");
 
-	if( shaderDiffusue == NULL || shaderTexUnlit == NULL || shaderDirShadow == NULL)
-		return -1;
-
-	return 0;
+	return err;
 }
 
 int initMaterial()
 {
-	matDeferred = new JMaterial();
 	matDeferred->texObj = texWorldmap;
-	matDeferred->shaderinfo = shaderDeferred;
+	matDeferred->shaderinfo = &shaderDeferred;
 
-	matDiffuse = new JMaterial();
-	matDiffuse->shaderinfo = shaderDiffusue;
+	matDiffuse->shaderinfo = &shaderDiffusue;
 
-	matTexUnlit = new JMaterial();
-	matTexUnlit->shaderinfo = shaderTexUnlit;
+	matTexUnlit->shaderinfo = &shaderTexUnlit;
 
-	matTable = new JMaterial();
 	matTable->texObj = texBlock;
-	matTable->shaderinfo = shaderDeferred;
+	matTable->shaderinfo = &shaderDeferred;
 
-	matObj2 = new JMaterial();
 	matObj2->texObj = texPlanet2;
-	matObj2->shaderinfo = shaderDeferred;
+	matObj2->shaderinfo = &shaderDeferred;
 
-	finalMat = new JMaterial();
-	finalMat->shaderinfo = shaderFinalDeferred;
+	finalMat->shaderinfo = &shaderFinalDeferred;
 
 	finalMat->extexObj1 = deferredFBO->getTextureObjectOfCanvas(BRUSH_DIFFUSE);
 	finalMat->extexObj2 = deferredFBO->getTextureObjectOfCanvas(BRUSH_NORMAL);
@@ -256,6 +259,9 @@ int initCameras()
 int init()
 {
 	glewInit();
+
+	if( initManagers() != 0 )
+		return -1;
 	if( initFBO() != 0 )
 		return -1;
 	if( initTextures() != 0)
@@ -276,7 +282,7 @@ int init()
 	worldLevel->pushMesh( objTable );
 	worldLevel->pushCamera( worldCamera );
 	worldLevel->shadowCamera = shadowCamera;
-	worldLevel->shadowShader = shaderDirShadow;
+	worldLevel->shadowShader = &shaderDirShadow;
 
 	screenLevel = new JLevel();
 	screenLevel->pushMesh( screenQuad );

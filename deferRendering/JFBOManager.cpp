@@ -304,12 +304,7 @@ JFrameBufferObject::JFrameBufferObject()
 {
 	bufferID = -1;//Any glGen* function would return ID of 0. 0 is for only special use.
 
-	colorTex = NULL;
-	depthTex = NULL;
-	positionTex = NULL;
-	normalTex = NULL;
-	texTex = NULL;
-	shadowTex = NULL;
+	mngTex = NULL;
 	stencilID = 0;
 }
 
@@ -338,111 +333,94 @@ int JFrameBufferObject::reset( int jfbo_brushes, GLsizei aWidth, GLsizei aHeight
 		brushes = jfbo_brushes;
 		if( (jfbo_brushes & BRUSH_DIFFUSE) )
 		{
-			//TODO : delete existing textures
-			colorTex = new JTextureObject();
-			result = JTextureManager::Inst()->makeTexture( *colorTex, aWidth, aHeight, JTEXTUREKIND_COLOR );
-			if( result != 0 )
-				throw;
-
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex->bufID, 0);
-			
+			if( colorTex.bufID == -1 || colorTex.width != aWidth || colorTex.height != aHeight )
+			{
+				mngTex->deleteTexture( colorTex );
+				if( mngTex->makeTexture( colorTex, aWidth, aHeight, JTEXTUREKIND_COLOR ) != 0 )
+					throw;
+			}
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex.bufID, 0);
 		}
 		else if( !(jfbo_brushes & BRUSH_DIFFUSE) )
 		{
-			if(colorTex)
-				JTextureManager::Inst()->deleteTexture( *colorTex );
-			//TODO  detach
+			mngTex->deleteTexture( colorTex );
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
-			colorTex = NULL;
 		}
 
 		if( (jfbo_brushes & BRUSH_POSITION) )
 		{
-			//TODO : delete existing textures
-			positionTex = new JTextureObject();
-			result = JTextureManager::Inst()->makeTexture( *positionTex, aWidth, aHeight, JTEXTUREKIND_VECTOR );
-			if( result != 0 )
-				throw;
-
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, positionTex->bufID, 0);
-
+			if( positionTex.bufID == -1 || positionTex.width != aWidth || positionTex.height != aHeight )
+			{
+				mngTex->deleteTexture( positionTex );
+				if(mngTex->makeTexture( positionTex, aWidth, aHeight, JTEXTUREKIND_VECTOR ) != 0)
+					throw;
+			}
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, positionTex.bufID, 0);
 		}
 		else if( !(jfbo_brushes & BRUSH_POSITION) )
 		{
-			if(positionTex)
-				JTextureManager::Inst()->deleteTexture( *positionTex );
-			//TODO  detach
+			mngTex->deleteTexture( positionTex );
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
-			positionTex = NULL;
 		}
 
 		if( (jfbo_brushes & BRUSH_NORMAL) )
 		{
-			//TODO : delete existing textures
-			normalTex = new JTextureObject();
-			result = JTextureManager::Inst()->makeTexture( *normalTex, aWidth, aHeight, JTEXTUREKIND_VECTOR );
-			if( result != 0 )
-				throw;
-
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, normalTex->bufID, 0);
-
+			if( normalTex.bufID == -1 || normalTex.width != aWidth || normalTex.height != aHeight )
+			{
+				mngTex->deleteTexture( normalTex );
+				if(mngTex->makeTexture( normalTex, aWidth, aHeight, JTEXTUREKIND_VECTOR ) != 0)
+					throw;
+			}
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, normalTex.bufID, 0);
 		}
 		else if( !(jfbo_brushes & BRUSH_NORMAL) )
 		{
-			if(normalTex)
-				JTextureManager::Inst()->deleteTexture( *normalTex );
-			//TODO  detach
+			mngTex->deleteTexture( normalTex );
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, 0, 0);
-			normalTex = NULL;
 		}
 		//----------------------------------------------------
 		if( (jfbo_brushes & BRUSH_TEX) )
 		{
 			//TODO : delete existing textures
-			texTex = new JTextureObject();
-			result = JTextureManager::Inst()->makeTexture( *texTex, aWidth, aHeight, JTEXTUREKIND_COLOR );
-			if( result != 0 )
-				throw;
-
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, texTex->bufID, 0);
-
+			if( texTex.bufID == -1 || texTex.width != aWidth || texTex.height != aHeight )
+			{
+				mngTex->deleteTexture( texTex );
+				if( mngTex->makeTexture( texTex, aWidth, aHeight, JTEXTUREKIND_COLOR ) != 0)
+					throw;
+			}
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, texTex.bufID, 0);
 		}
 		else if( !(jfbo_brushes & BRUSH_TEX) )
 		{
-			if(texTex)
-				JTextureManager::Inst()->deleteTexture( *texTex );
-			//TODO  detach
+			mngTex->deleteTexture( texTex );
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, 0, 0);
-			texTex = NULL;
 		}
 		//----------------------------------------------------
 		if( (jfbo_brushes & BRUSH_SHADOW) )
 		{
 			//TODO : delete existing textures
-			shadowTex = new JTextureObject();
-			result = JTextureManager::Inst()->makeTexture( *shadowTex, aWidth, aHeight, JTEXTUREKIND_COLOR );
-			if( result != 0 )
-				throw;
-
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, shadowTex->bufID, 0);
-
+			if( shadowTex.bufID == -1 || shadowTex.width != aWidth || shadowTex.height != aHeight )
+			{
+				mngTex->deleteTexture( shadowTex );
+				if(mngTex->makeTexture( shadowTex, aWidth, aHeight, JTEXTUREKIND_COLOR ) != 0)
+					throw;
+			}
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, shadowTex.bufID, 0);
 		}
 		else if( !(jfbo_brushes & BRUSH_SHADOW) )
 		{
-			if(shadowTex)
-				JTextureManager::Inst()->deleteTexture( *shadowTex );
-			//TODO  detach
+			mngTex->deleteTexture( shadowTex );
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, 0, 0);
-			shadowTex = NULL;
 		}
 		if( (jfbo_brushes & BRUSH_DEPTH) )
 		{
-			depthTex = new JTextureObject();
-			result = JTextureManager::Inst()->makeTexture( *depthTex, aWidth, aHeight, JTEXTUREKIND_DEPTH );
-			if( result != 0 )
-				throw;
-
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex->bufID, 0);
+			if( depthTex.bufID == -1 || depthTex.width != aWidth || depthTex.height != aHeight )
+			{
+				mngTex->deleteTexture( depthTex );
+				if(mngTex->makeTexture( depthTex, aWidth, aHeight, JTEXTUREKIND_DEPTH )!=0)
+					throw;
+			}
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex.bufID, 0);
 			/*glGenRenderbuffers(1, &depthRBO);
 			glBindRenderbuffer(GL_RENDERBUFFER, depthRBO);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, aWidth, aHeight);
@@ -451,11 +429,8 @@ int JFrameBufferObject::reset( int jfbo_brushes, GLsizei aWidth, GLsizei aHeight
 		}
 		else if( !(jfbo_brushes & BRUSH_DEPTH) )
 		{
-			if(depthTex)
-				JTextureManager::Inst()->deleteTexture( *depthTex );
-			//TODO  detach
+			mngTex->deleteTexture( depthTex );
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
-			depthTex = NULL;
 			/*glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
 			depthRBO = 0;*/
 		}
@@ -561,39 +536,45 @@ JTextureObject* JFrameBufferObject::getTextureObjectOfCanvas( JFBO_BRUSHES which
 	switch(whichTex)
 	{
 	case BRUSH_DIFFUSE:
-		return colorTex;
+		return colorTex.bufID==-1 ? NULL : &colorTex;
 		break;
 	case BRUSH_DEPTH:
-		return depthTex;
+		return depthTex.bufID==-1 ? NULL : &depthTex;
 		break;
 	case BRUSH_POSITION:
-		return positionTex;
+		return positionTex.bufID==-1 ? NULL : &positionTex;
 		break;
 	case BRUSH_NORMAL:
-		return normalTex;
+		return normalTex.bufID==-1 ? NULL : &normalTex;
 		break;
 	case BRUSH_TEX:
-		return texTex;
+		return texTex.bufID==-1 ? NULL : &texTex;
 		break;
 	case BRUSH_SHADOW:
-		return shadowTex;
+		return shadowTex.bufID==-1 ? NULL : &shadowTex;
 		break;
 	}
 	return NULL;
 }
 
-JFBOManager::JFBOManager()
+int JFrameBufferObject::initFBO(JTextureManager& argMngTex)
 {
+	mngTex = &argMngTex;
+	return 0;
 }
 
-JFrameBufferObject* JFBOManager::makeCanvasWithAttribute( int jfbo_brushes, GLsizei width, GLsizei height )
+int JFBOManager::makeCanvasWithAttribute( JFrameBufferObject& fbo, int jfbo_brushes, GLsizei width, GLsizei height )
 {
-	JFrameBufferObject* fbo = new JFrameBufferObject();
+	fbo.initFBO( *mngTex );
+	if(fbo.reset( jfbo_brushes, width, height ) == -1)
+		return -1;
+	return 0;
+}
 
-	if(fbo->reset( jfbo_brushes, width, height ) == -1)
-		return NULL;
-
-	return fbo;
+int JFBOManager::initFBOManager(JTextureManager& argMngTex)
+{
+	mngTex = &argMngTex;
+	return 0;
 }
 
 

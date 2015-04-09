@@ -13,6 +13,8 @@ class JTextureObject
 {
 public:
 	//TODO must hold string key
+	int width;
+	int height;
 	GLuint bufID;
 	JTextureObject();
 };
@@ -35,14 +37,6 @@ public:
 	int deleteTexture( JTextureObject& texObj );
 
 	JTextureManager(){};
-
-	static JTextureManager* Inst()
-	{
-		static JTextureManager* instance = NULL;
-		if(instance == NULL)
-			instance = new JTextureManager();
-		return instance;
-	}
 };
 
 

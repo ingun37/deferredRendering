@@ -1,8 +1,7 @@
 #include "JTextureManager.h"
 #include <iostream>
-JTextureObject::JTextureObject()
+JTextureObject::JTextureObject():bufID(-1),width(0),height(0)
 {
-	bufID = -1;
 }
 
 int JTextureManager::makeTexture( JTextureObject& texObj, GLsizei width, GLsizei height, JTEXTURE_KINDS kind )
@@ -49,11 +48,9 @@ int JTextureManager::makeTexture( JTextureObject& texObj, GLsizei width, GLsizei
 	
 	glBindTexture(GL_TEXTURE_2D, 0);
 	
-	JTextureObject* tObj = new JTextureObject();
-	tObj->bufID = textureID;
-	
 	texObj.bufID= textureID;
-	
+	texObj.width = width;
+	texObj.height = height;
 	return 0;
 }
 
@@ -107,6 +104,9 @@ int JTextureManager::makeTexture(JTextureObject& texObj, JTEXTURE_IMAGEFORMAT im
 	
 	glBindTexture(GL_TEXTURE_2D, 0);
 	delete [] texData;
+
+	texObj.width = width;
+	texObj.height = height;
 
 	return 0;
 }

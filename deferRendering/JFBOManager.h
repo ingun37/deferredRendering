@@ -33,17 +33,19 @@ public:
 
 	GLuint bufferID;
 
-	JTextureObject* colorTex;
-	JTextureObject* positionTex;
-	JTextureObject* normalTex;
-	JTextureObject* texTex;
-	JTextureObject* shadowTex;
-	JTextureObject* depthTex;
+	JTextureObject colorTex;
+	JTextureObject positionTex;
+	JTextureObject normalTex;
+	JTextureObject texTex;
+	JTextureObject shadowTex;
+	JTextureObject depthTex;
 
 	GLuint stencilID;
 
 	int brushes;
 
+	JTextureManager* mngTex;
+	int initFBO( JTextureManager& argMngTex );
 	JFrameBufferObject();
 
 	int reset( int jfbo_brushes, GLsizei width, GLsizei height);
@@ -56,18 +58,10 @@ public:
 class JFBOManager
 {
 public:
-	JFrameBufferObject* makeCanvasWithAttribute( int jfbo_brushes, GLsizei width, GLsizei height );
-	
-	
-	static JFBOManager* Inst()
-	{
-		static JFBOManager* instance = NULL;
-		if(instance == NULL)
-			instance = new JFBOManager();
-		return instance;
-	}
-
-	JFBOManager();
+	JTextureManager *mngTex;
+	int makeCanvasWithAttribute( JFrameBufferObject& fbo, int jfbo_brushes, GLsizei width, GLsizei height );
+	int initFBOManager( JTextureManager& argMngTex );
+	JFBOManager():mngTex(0){};
 };
 
 

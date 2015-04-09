@@ -24,6 +24,8 @@ public:
 		
 	unsigned int lmvp;
 	JShaderKinds shaderKind;
+
+	shaderInfo():p(-1),v(-1),f(-1),lmvp(-1){};
 };
 
 class shaderInfo_Deferred : public shaderInfo
@@ -105,30 +107,23 @@ public:
 		int useProgram_Deferred();
 
 
-		shaderInfo_Deferred* setProgram_Deferred(const string& name, char* vpath, char* fpath);
+		int setProgram_Deferred(shaderInfo_Deferred& info, const string& name, char* vpath, char* fpath);
 		int setUniformVariables_Deferred( JMatrix44 mvp, JTextureObject* tex,JMatrix44& shadowPV, JTextureObject* shadowTex, JMatrix44& trans );
 		
-		shaderInfo_TexUnlit* setProgram_TexUnlit(const string& name, char* vpath, char* fpath);
+		int setProgram_TexUnlit(shaderInfo_TexUnlit& info, const string& name, char* vpath, char* fpath);
 		int setUniformVariables_TexUnlit( JMatrix44 mvp, JTextureObject* aTex );
 
-		shaderInfo_Diffuse* setProgram_Diffuse(const string& name, char* vpath, char* fpath);
+		int setProgram_Diffuse(shaderInfo_Diffuse& info, const string& name, char* vpath, char* fpath);
 		int setUniformVariables_Diffuse( JMatrix44 mvp );
 
-		shaderInfo_DirShadow* setProgram_DirShadow(const string& name, char* vpath, char* fpath);
+		int setProgram_DirShadow(shaderInfo_DirShadow& info, const string& name, char* vpath, char* fpath);
 		int setUniformVariables_DirShadow( JMatrix44 mvp );
 
-		shaderInfo_FinalDeferred* setProgram_FinalDeferred(const string& name, char* vpath, char* fpath);
+		int setProgram_FinalDeferred(shaderInfo_FinalDeferred& info, const string& name, char* vpath, char* fpath);
 		int setUniformVariables_FinalDeferred( JMatrix44 mvp, JVector3 eyepos, JVector3 lightDir, JTextureObject* diffuseMap, JTextureObject* normalMap, JTextureObject* positionMap, JTextureObject* textureMap, JTextureObject* shadowMap );
 
 		JProgramManager(){};
 
-		static JProgramManager* Inst()
-		{
-			static JProgramManager* instance = NULL;
-			if(instance == NULL)
-				instance = new JProgramManager();
-			return instance;
-		}
 };
 
 

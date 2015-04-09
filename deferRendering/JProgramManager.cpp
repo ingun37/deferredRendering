@@ -184,28 +184,25 @@ int JProgramManager::useProgram_Deferred()
 //////////////////////////////
 //---------------------DEFERRED
 //////////////////////////////
-shaderInfo_Deferred* JProgramManager::setProgram_Deferred(const string& name, char* vpath, char* fpath)
+int JProgramManager::setProgram_Deferred(shaderInfo_Deferred& info, const string& name, char* vpath, char* fpath)
 {
+	if(makeVertexShader(vpath,NULL, info.v) != 0)
+		return -1;
+	if(makeFragmentShader(fpath,NULL, info.f) != 0)
+		return -1;
+	if(makeProgram(info.v, info.f, info.p) != 0)
+		return -1;
 
-	shaderInfo_Deferred* info = new shaderInfo_Deferred();
+	info.lmvp = 4;
+	info.ltex = 5;
+	info.lShadowPV = 6;
+	info.lShadowTex = 7;
+	info.lTrans = 8;
 
-	if(makeVertexShader(vpath,NULL, info->v) != 0)
-		return NULL;
-	if(makeFragmentShader(fpath,NULL, info->f) != 0)
-		return NULL;
-	if(makeProgram(info->v, info->f, info->p) != 0)
-		return NULL;
+	if(info.p > 0)
+		programs[name] = &info;
 
-	info->lmvp = 4;
-	info->ltex = 5;
-	info->lShadowPV = 6;
-	info->lShadowTex = 7;
-	info->lTrans = 8;
-
-	if(info->p > 0)
-		programs[name] = info;
-
-	return info;
+	return 0;
 }
 
 int JProgramManager::setUniformVariables_Deferred( JMatrix44 mvp, JTextureObject* aTex,JMatrix44& shadowPV, JTextureObject* shadowTex, JMatrix44& trans )
@@ -235,16 +232,14 @@ int JProgramManager::setUniformVariables_Deferred( JMatrix44 mvp, JTextureObject
 //////////////////////////////
 //---------------------TEXUNLIT
 //////////////////////////////
-shaderInfo_TexUnlit* JProgramManager::setProgram_TexUnlit(const string& name, char* vpath, char* fpath)
+int JProgramManager::setProgram_TexUnlit(shaderInfo_TexUnlit& info, const string& name, char* vpath, char* fpath)
 {
-	shaderInfo_TexUnlit* info = new shaderInfo_TexUnlit();
-
-	if(makeVertexShader(vpath,NULL, info->v) != 0)
-		return NULL;
-	if(makeFragmentShader(fpath,NULL, info->f) != 0)
-		return NULL;
-	if(makeProgram(info->v, info->f, info->p) != 0)
-		return NULL;
+	if(makeVertexShader(vpath,NULL, info.v) != 0)
+		return -1;
+	if(makeFragmentShader(fpath,NULL, info.f) != 0)
+		return -1;
+	if(makeProgram(info.v, info.f, info.p) != 0)
+		return -1;
 
 	/*GLuint uniformBlockIndex;
 
@@ -262,19 +257,19 @@ shaderInfo_TexUnlit* JProgramManager::setProgram_TexUnlit(const string& name, ch
 	glBufferData(GL_UNIFORM_BUFFER, info->uniformBlockSize, info->buffer, GL_DYNAMIC_DRAW);
 	glBindBufferBase(GL_UNIFORM_BUFFER, uniformBlockIndex, info->uniformBlockBufferObject);
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);*/
-	info->lmvp = 4;
-	info->ltex = 5;
+	info.lmvp = 4;
+	info.ltex = 5;
 
-	if(info->lmvp == -1 || info->ltex == -1)
+	if(info.lmvp == -1 || info.ltex == -1)
 		return NULL;
 
-	if(info->p > 0)
+	if(info.p > 0)
 	{
-		info->name = name;
-		programs[name] = info;
+		info.name = name;
+		programs[name] = &info;
 	}
 
-	return info;
+	return 0;
 }
 
 int JProgramManager::setUniformVariables_TexUnlit( JMatrix44 mvp, JTextureObject* aTex )
@@ -304,27 +299,25 @@ int JProgramManager::setUniformVariables_TexUnlit( JMatrix44 mvp, JTextureObject
 //////////////////////////////
 //---------------------DIFFUSE
 //////////////////////////////
-shaderInfo_Diffuse* JProgramManager::setProgram_Diffuse(const string& name, char* vpath, char* fpath)
+int JProgramManager::setProgram_Diffuse(shaderInfo_Diffuse& info, const string& name, char* vpath, char* fpath)
 {
-	shaderInfo_Diffuse* info = new shaderInfo_Diffuse();
-
-	if(makeVertexShader(vpath,NULL, info->v) != 0)
-		return NULL;
-	if(makeFragmentShader(fpath,NULL, info->f) != 0)
-		return NULL;
-	if(makeProgram(info->v, info->f, info->p) != 0)
-		return NULL;
+	if(makeVertexShader(vpath,NULL, info.v) != 0)
+		return -1;
+	if(makeFragmentShader(fpath,NULL, info.f) != 0)
+		return -1;
+	if(makeProgram(info.v, info.f, info.p) != 0)
+		return -1;
 
 
-	info->lmvp = 4;
+	info.lmvp = 4;
 
-	if(info->p > 0)
+	if(info.p > 0)
 	{
-		programs[name] = info;
-		info->name = name;
+		programs[name] = &info;
+		info.name = name;
 	}
 
-	return info;
+	return 0;
 }
 
 int JProgramManager::setUniformVariables_Diffuse( JMatrix44 mvp )
@@ -351,27 +344,25 @@ int JProgramManager::setUniformVariables_Diffuse( JMatrix44 mvp )
 //////////////////////////////
 //---------------------shadow
 //////////////////////////////
-shaderInfo_DirShadow* JProgramManager::setProgram_DirShadow(const string& name, char* vpath, char* fpath)
+int JProgramManager::setProgram_DirShadow(shaderInfo_DirShadow& info, const string& name, char* vpath, char* fpath)
 {
-	shaderInfo_DirShadow* info = new shaderInfo_DirShadow();
-
-	if(makeVertexShader(vpath,NULL, info->v) != 0)
-		return NULL;
-	if(makeFragmentShader(fpath,NULL, info->f) != 0)
-		return NULL;
-	if(makeProgram(info->v, info->f, info->p) != 0)
-		return NULL;
+	if(makeVertexShader(vpath,NULL, info.v) != 0)
+		return -1;
+	if(makeFragmentShader(fpath,NULL, info.f) != 0)
+		return -1;
+	if(makeProgram(info.v, info.f, info.p) != 0)
+		return -1;
 
 
-	info->lmvp = 4;
+	info.lmvp = 4;
 
-	if(info->p > 0)
+	if(info.p > 0)
 	{
-		programs[name] = info;
-		info->name = name;
+		programs[name] = &info;
+		info.name = name;
 	}
 
-	return info;
+	return 0;
 }
 
 int JProgramManager::setUniformVariables_DirShadow( JMatrix44 mvp )
@@ -390,34 +381,32 @@ int JProgramManager::setUniformVariables_DirShadow( JMatrix44 mvp )
 //////////////////////////////
 //---------------------shadow
 //////////////////////////////
-shaderInfo_FinalDeferred* JProgramManager::setProgram_FinalDeferred(const string& name, char* vpath, char* fpath)
+int JProgramManager::setProgram_FinalDeferred(shaderInfo_FinalDeferred& info, const string& name, char* vpath, char* fpath)
 {
-	shaderInfo_FinalDeferred* info = new shaderInfo_FinalDeferred();
-
-	if(makeVertexShader(vpath,NULL, info->v) != 0)
-		return NULL;
-	if(makeFragmentShader(fpath,NULL, info->f) != 0)
-		return NULL;
-	if(makeProgram(info->v, info->f, info->p) != 0)
-		return NULL;
+	if(makeVertexShader(vpath,NULL, info.v) != 0)
+		return -1;
+	if(makeFragmentShader(fpath,NULL, info.f) != 0)
+		return -1;
+	if(makeProgram(info.v, info.f, info.p) != 0)
+		return -1;
 
 
-	info->lmvp = 4;
-	info->lLightDir = 5;
-	info->lDiffuseMap = 6;
-	info->lNormalMap = 7;
-	info->lPositionMap = 8;
-	info->lTextureMap = 9;
-	info->lShadowMap = 10;
-	info->lEyePos = 11;
+	info.lmvp = 4;
+	info.lLightDir = 5;
+	info.lDiffuseMap = 6;
+	info.lNormalMap = 7;
+	info.lPositionMap = 8;
+	info.lTextureMap = 9;
+	info.lShadowMap = 10;
+	info.lEyePos = 11;
 
-	if(info->p > 0)
+	if(info.p > 0)
 	{
-		programs[name] = info;
-		info->name = name;
+		programs[name] = &info;
+		info.name = name;
 	}
 
-	return info;
+	return 0;
 }
 
 int JProgramManager::setUniformVariables_FinalDeferred( JMatrix44 mvp, JVector3 eyepos, JVector3 lightDir, JTextureObject* diffuseMap, JTextureObject* normalMap, JTextureObject* positionMap, JTextureObject* textureMap, JTextureObject* shadowMap )
