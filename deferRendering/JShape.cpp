@@ -9,6 +9,7 @@
 #define sphereIndexNumForTex(S) (sphereFaceNumForTex(S)*3)
 #define PI 3.141592f
 
+//TODO : lets prevent below pool overflow.
 JVertex vertexPool[ sphereVertexNumForTex(500) ];
 unsigned int indexPool[ sphereIndexNumForTex(500) ];
 int makeSphere( float radius, unsigned int smoothness, JMesh& mesh )

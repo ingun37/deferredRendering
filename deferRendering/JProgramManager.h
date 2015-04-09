@@ -16,8 +16,6 @@ using namespace std;
 class shaderInfo
 {
 public:
-	string name;
-
 	unsigned int p;
 	unsigned int v;
 	unsigned int f;
@@ -37,7 +35,6 @@ public:
 	unsigned int lShadowTex;
 	shaderInfo_Deferred()
 	{
-		//TODO set shaderkind to JShader_Deferred
 		shaderKind = JSHADERKIND_DEFERRED;
 	}
 };
@@ -99,27 +96,22 @@ class JProgramManager
 public:
 		static unsigned int currentlyRunningProgram;
 		static const shaderInfo* currentlyRunningInfo;
-		
-		
 
-		int useProgram(const string& shaderName);
 		int useProgram(const shaderInfo* aShaderInfo);
-		int useProgram_Deferred();
 
-
-		int setProgram_Deferred(shaderInfo_Deferred& info, const string& name, char* vpath, char* fpath);
+		int setProgram_Deferred(shaderInfo_Deferred& info, char* vpath, char* fpath);
 		int setUniformVariables_Deferred( JMatrix44 mvp, JTextureObject* tex,JMatrix44& shadowPV, JTextureObject* shadowTex, JMatrix44& trans );
 		
-		int setProgram_TexUnlit(shaderInfo_TexUnlit& info, const string& name, char* vpath, char* fpath);
+		int setProgram_TexUnlit(shaderInfo_TexUnlit& info, char* vpath, char* fpath);
 		int setUniformVariables_TexUnlit( JMatrix44 mvp, JTextureObject* aTex );
 
-		int setProgram_Diffuse(shaderInfo_Diffuse& info, const string& name, char* vpath, char* fpath);
+		int setProgram_Diffuse(shaderInfo_Diffuse& info, char* vpath, char* fpath);
 		int setUniformVariables_Diffuse( JMatrix44 mvp );
 
-		int setProgram_DirShadow(shaderInfo_DirShadow& info, const string& name, char* vpath, char* fpath);
+		int setProgram_DirShadow(shaderInfo_DirShadow& info, char* vpath, char* fpath);
 		int setUniformVariables_DirShadow( JMatrix44 mvp );
 
-		int setProgram_FinalDeferred(shaderInfo_FinalDeferred& info, const string& name, char* vpath, char* fpath);
+		int setProgram_FinalDeferred(shaderInfo_FinalDeferred& info, char* vpath, char* fpath);
 		int setUniformVariables_FinalDeferred( JMatrix44 mvp, JVector3 eyepos, JVector3 lightDir, JTextureObject* diffuseMap, JTextureObject* normalMap, JTextureObject* positionMap, JTextureObject* textureMap, JTextureObject* shadowMap );
 
 		JProgramManager(){};

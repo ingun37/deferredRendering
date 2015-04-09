@@ -381,7 +381,6 @@ int JFrameBufferObject::reset( int jfbo_brushes, GLsizei aWidth, GLsizei aHeight
 		//----------------------------------------------------
 		if( (jfbo_brushes & BRUSH_TEX) )
 		{
-			//TODO : delete existing textures
 			if( texTex.bufID == -1 || texTex.width != aWidth || texTex.height != aHeight )
 			{
 				mngTex->deleteTexture( texTex );
@@ -398,7 +397,6 @@ int JFrameBufferObject::reset( int jfbo_brushes, GLsizei aWidth, GLsizei aHeight
 		//----------------------------------------------------
 		if( (jfbo_brushes & BRUSH_SHADOW) )
 		{
-			//TODO : delete existing textures
 			if( shadowTex.bufID == -1 || shadowTex.width != aWidth || shadowTex.height != aHeight )
 			{
 				mngTex->deleteTexture( shadowTex );

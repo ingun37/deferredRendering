@@ -155,16 +155,6 @@ int JProgramManager::makeProgram(GLuint attachingVertexShader, GLuint attachingF
 	return 0;
 }
 
-int JProgramManager::useProgram(const string& shaderName)
-{
-	shaderInfo* sInfo = programs[shaderName];
-	if(sInfo == NULL) return -1;
-	currentlyRunningInfo = sInfo;
-	glUseProgram(sInfo->p);
-
-	return 0;
-}
-
 int JProgramManager::useProgram(const shaderInfo* sInfo)
 {
 	if(sInfo == NULL) return -1;
@@ -175,16 +165,10 @@ int JProgramManager::useProgram(const shaderInfo* sInfo)
 	return 0;
 }
 
-int JProgramManager::useProgram_Deferred()
-{
-	//TODO
-	return 0;
-}
-
 //////////////////////////////
 //---------------------DEFERRED
 //////////////////////////////
-int JProgramManager::setProgram_Deferred(shaderInfo_Deferred& info, const string& name, char* vpath, char* fpath)
+int JProgramManager::setProgram_Deferred(shaderInfo_Deferred& info, char* vpath, char* fpath)
 {
 	if(makeVertexShader(vpath,NULL, info.v) != 0)
 		return -1;
@@ -200,8 +184,8 @@ int JProgramManager::setProgram_Deferred(shaderInfo_Deferred& info, const string
 	info.lTrans = 8;
 
 	if(info.p > 0)
-		programs[name] = &info;
-
+	{
+	}
 	return 0;
 }
 
@@ -232,7 +216,7 @@ int JProgramManager::setUniformVariables_Deferred( JMatrix44 mvp, JTextureObject
 //////////////////////////////
 //---------------------TEXUNLIT
 //////////////////////////////
-int JProgramManager::setProgram_TexUnlit(shaderInfo_TexUnlit& info, const string& name, char* vpath, char* fpath)
+int JProgramManager::setProgram_TexUnlit(shaderInfo_TexUnlit& info, char* vpath, char* fpath)
 {
 	if(makeVertexShader(vpath,NULL, info.v) != 0)
 		return -1;
@@ -265,8 +249,6 @@ int JProgramManager::setProgram_TexUnlit(shaderInfo_TexUnlit& info, const string
 
 	if(info.p > 0)
 	{
-		info.name = name;
-		programs[name] = &info;
 	}
 
 	return 0;
@@ -299,7 +281,7 @@ int JProgramManager::setUniformVariables_TexUnlit( JMatrix44 mvp, JTextureObject
 //////////////////////////////
 //---------------------DIFFUSE
 //////////////////////////////
-int JProgramManager::setProgram_Diffuse(shaderInfo_Diffuse& info, const string& name, char* vpath, char* fpath)
+int JProgramManager::setProgram_Diffuse(shaderInfo_Diffuse& info, char* vpath, char* fpath)
 {
 	if(makeVertexShader(vpath,NULL, info.v) != 0)
 		return -1;
@@ -313,8 +295,6 @@ int JProgramManager::setProgram_Diffuse(shaderInfo_Diffuse& info, const string& 
 
 	if(info.p > 0)
 	{
-		programs[name] = &info;
-		info.name = name;
 	}
 
 	return 0;
@@ -344,7 +324,7 @@ int JProgramManager::setUniformVariables_Diffuse( JMatrix44 mvp )
 //////////////////////////////
 //---------------------shadow
 //////////////////////////////
-int JProgramManager::setProgram_DirShadow(shaderInfo_DirShadow& info, const string& name, char* vpath, char* fpath)
+int JProgramManager::setProgram_DirShadow(shaderInfo_DirShadow& info, char* vpath, char* fpath)
 {
 	if(makeVertexShader(vpath,NULL, info.v) != 0)
 		return -1;
@@ -358,8 +338,6 @@ int JProgramManager::setProgram_DirShadow(shaderInfo_DirShadow& info, const stri
 
 	if(info.p > 0)
 	{
-		programs[name] = &info;
-		info.name = name;
 	}
 
 	return 0;
@@ -381,7 +359,7 @@ int JProgramManager::setUniformVariables_DirShadow( JMatrix44 mvp )
 //////////////////////////////
 //---------------------shadow
 //////////////////////////////
-int JProgramManager::setProgram_FinalDeferred(shaderInfo_FinalDeferred& info, const string& name, char* vpath, char* fpath)
+int JProgramManager::setProgram_FinalDeferred(shaderInfo_FinalDeferred& info, char* vpath, char* fpath)
 {
 	if(makeVertexShader(vpath,NULL, info.v) != 0)
 		return -1;
@@ -402,8 +380,6 @@ int JProgramManager::setProgram_FinalDeferred(shaderInfo_FinalDeferred& info, co
 
 	if(info.p > 0)
 	{
-		programs[name] = &info;
-		info.name = name;
 	}
 
 	return 0;

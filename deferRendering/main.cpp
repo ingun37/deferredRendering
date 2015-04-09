@@ -100,11 +100,11 @@ int initTextures()
 int initShaders()
 {
 	int err = 0;
-	err |= mngProgram.setProgram_Diffuse(shaderDiffusue,"diffuse","../deferRendering/diffuse.vert","../deferRendering/diffuse.frag");
-	err |= mngProgram.setProgram_TexUnlit(shaderTexUnlit,"texunlit","../deferRendering/texunlit.vert","../deferRendering/texunlit.frag");
-	err |= mngProgram.setProgram_Deferred(shaderDeferred,"deferred","../deferRendering/deferred.vert","../deferRendering/deferred.frag");
-	err |= mngProgram.setProgram_DirShadow(shaderDirShadow,"dirshadow","../deferRendering/dirShadow.vert","../deferRendering/dirShadow.frag");
-	err |= mngProgram.setProgram_FinalDeferred(shaderFinalDeferred,"finaldeferred","../deferRendering/finalDeferred.vert","../deferRendering/finalDeferred.frag");
+	err |= mngProgram.setProgram_Diffuse(shaderDiffusue,"../deferRendering/diffuse.vert","../deferRendering/diffuse.frag");
+	err |= mngProgram.setProgram_TexUnlit(shaderTexUnlit,"../deferRendering/texunlit.vert","../deferRendering/texunlit.frag");
+	err |= mngProgram.setProgram_Deferred(shaderDeferred,"../deferRendering/deferred.vert","../deferRendering/deferred.frag");
+	err |= mngProgram.setProgram_DirShadow(shaderDirShadow,"../deferRendering/dirShadow.vert","../deferRendering/dirShadow.frag");
+	err |= mngProgram.setProgram_FinalDeferred(shaderFinalDeferred,"../deferRendering/finalDeferred.vert","../deferRendering/finalDeferred.frag");
 
 	return err;
 }
