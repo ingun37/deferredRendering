@@ -12,6 +12,7 @@
 //TODO : lets prevent below pool overflow.
 JVertex vertexPool[ sphereVertexNumForTex(500) ];
 unsigned int indexPool[ sphereIndexNumForTex(500) ];
+
 int makeSphere( float radius, unsigned int smoothness, JMesh& mesh )
 {
 	unsigned long pnum = sphereVertexNumForTex(smoothness);
@@ -198,5 +199,150 @@ int makePlane(float widthLen, float heightLen, unsigned int widthSeg, unsigned i
 	}
 	delete [] indices;
 	delete [] vertices;
+	return 0;
+}
+
+#define cylinderCNum(SM) ((SM*2)+3)
+#define cylinderHNum(SG) (SG+1)
+#define cylinderVNum(SM,SG) ((cylinderCNum(SM)*cylinderHNum(SG)) + (2*(cylinderCNum(SM)-1)))
+#define cylinderINum(SM,SG) ((((cylinderCNum(SM)-1)*(SG))*6) + (((cylinderCNum(SM)-3)*3)*2))
+int makeCylinder( float radius, unsigned int smoothness, float length, unsigned int segment, JMesh& mesh )
+{
+	unsigned long pnum = cylinderVNum(smoothness,segment);
+	unsigned long idxnum = cylinderINum(smoothness,segment);
+	unsigned int verticalNum = cylinderHNum(segment);
+	unsigned int circlenum = cylinderCNum(smoothness);
+
+	mesh.clearAll();
+	mesh.reserveVertexLen(pnum);
+	mesh.reserveIndexLen(idxnum);
+
+	JVertex* tmpvertices = vertexPool; //new JVertex[pnum]
+	unsigned int *tmpIndices = indexPool ;//new unsigned int[idxnum];
+
+	float tmpangle, tmpheight;
+
+	tmpangle = PI/(smoothness+1);
+
+	int cnt = 0;
+	try
+	{
+		for (unsigned int i=0;i<circlenum-1;i++)
+		{
+			tmpvertices[cnt].position[0] = cosf(tmpangle * i) * radius;
+			tmpvertices[cnt].position[1] = length/2;
+			tmpvertices[cnt].position[2] = sinf(tmpangle * i) * radius;
+
+			tmpvertices[cnt].normal[0] = 0;
+			tmpvertices[cnt].normal[1] = 1;
+			tmpvertices[cnt].normal[2] = 0;
+
+			tmpvertices[cnt].uv[0] = 0;
+			tmpvertices[cnt].uv[1] = 0;
+
+			tmpvertices[cnt].diffuse[0] = 1;
+			tmpvertices[cnt].diffuse[1] = 0;
+			tmpvertices[cnt].diffuse[2] = 0;
+			tmpvertices[cnt].diffuse[3] = 1;
+			cnt++;
+		}
+		for(unsigned int i=0;i<verticalNum;i++)
+		{
+			tmpheight = (length/2) - ((length/(verticalNum-1))*i);
+			for(unsigned int j=0;j<circlenum;j++)
+			{
+				tmpvertices[cnt].position[0] = cosf(tmpangle * j) * radius;
+				tmpvertices[cnt].position[1] = tmpheight;
+				tmpvertices[cnt].position[2] = sinf(tmpangle * j) * radius;
+
+				tmpvertices[cnt].normal[0] = tmpvertices[cnt].position[0]/radius;
+				tmpvertices[cnt].normal[1] = 0;
+				tmpvertices[cnt].normal[2] = tmpvertices[cnt].position[2]/radius;
+
+				tmpvertices[cnt].uv[0] = ((float)j)/(circlenum-1);
+				tmpvertices[cnt].uv[1] = 1- ((float)i)/(verticalNum-1);
+
+				tmpvertices[cnt].diffuse[0] = 0;
+				tmpvertices[cnt].diffuse[1] = 0;
+				tmpvertices[cnt].diffuse[2] = abs(sinf(tmpangle * j));
+				tmpvertices[cnt].diffuse[3] = 1;
+
+				cnt++;
+			}
+		}
+		for (unsigned int i=0;i<circlenum-1;i++)
+		{
+			tmpvertices[cnt].position[0] = -cosf(tmpangle * i) * radius;
+			tmpvertices[cnt].position[1] = -length/2;
+			tmpvertices[cnt].position[2] = sinf(tmpangle * i) * radius;
+
+			tmpvertices[cnt].normal[0] = 0;
+			tmpvertices[cnt].normal[1] = -1;
+			tmpvertices[cnt].normal[2] = 0;
+
+			tmpvertices[cnt].uv[0] = 0;
+			tmpvertices[cnt].uv[1] = 0;
+
+			tmpvertices[cnt].diffuse[0] = 0;
+			tmpvertices[cnt].diffuse[1] = 1;
+			tmpvertices[cnt].diffuse[2] = 0;
+			tmpvertices[cnt].diffuse[3] = 1;
+			cnt++;
+		}
+		if(cnt != pnum)
+			puts("odd... not correct");
+		cnt = 0;
+
+		for(unsigned int i=0;i<pnum;i++)
+			mesh.pushVertex( tmpvertices[i] );
+
+		unsigned int mark = 0;
+		for(unsigned int i=0;i<circlenum-1-2;i++)
+		{
+			tmpIndices[cnt+0] = 0;
+			tmpIndices[cnt+1] = i+1;
+			tmpIndices[cnt+2] = i+2;
+			cnt+=3;
+		}
+		mark = (circlenum - 1);
+		for(unsigned int i=0;i<segment;i++)
+		{
+			for(unsigned int j=0;j<circlenum-1;j++)
+			{
+				tmpIndices[cnt + 0] = mark+ i * circlenum + j;
+				tmpIndices[cnt + 1] = mark+ i * circlenum + (j+1);
+				tmpIndices[cnt + 2] = mark+ (i+1) * circlenum + j;
+				tmpIndices[cnt + 3] = mark+ i * circlenum + j+1;
+				tmpIndices[cnt + 4] = mark+ (i+1) * circlenum + (j+1);
+				tmpIndices[cnt + 5] = mark+ (i+1) * circlenum + j;
+
+				cnt+=6;
+			}
+		}
+		mark = pnum - (circlenum-1);
+		for(unsigned int i=0;i<circlenum-1-2;i++)
+		{
+			tmpIndices[cnt+0] = mark+ 0;
+			tmpIndices[cnt+1] = mark+i+1;
+			tmpIndices[cnt+2] = mark+i+2;
+			cnt+=3;
+		}
+		if(cnt!=idxnum)
+			puts("odd... not correct");
+		cnt=0;
+
+		for(unsigned int i=0;i<idxnum;i++)
+			mesh.pushIndex( tmpIndices[i] );
+	}
+	catch(...)
+	{
+		puts(" make cylinder ");
+		//delete tmpvertices;
+		//delete tmpIndices;
+		return -1;
+	}
+
+	//delete [] tmpvertices;
+	//delete [] tmpIndices;
 	return 0;
 }

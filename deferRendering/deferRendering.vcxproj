@@ -91,6 +91,7 @@
     <ClCompile Include="JProgramManager.cpp" />
     <ClCompile Include="JShape.cpp" />
     <ClCompile Include="JSingleton.cpp" />
+    <ClCompile Include="JSkinCluster.cpp" />
     <ClCompile Include="JTextureManager.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
@@ -105,6 +106,7 @@
     <ClInclude Include="JMesh.h" />
     <ClInclude Include="JLinearAlgebra.h" />
     <ClInclude Include="JSingleton.h" />
+    <ClInclude Include="JSkinCluster.h" />
     <ClInclude Include="JTextureManager.h" />
   </ItemGroup>
   <ItemGroup>

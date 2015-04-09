@@ -51,7 +51,7 @@ JMesh *obj1 = NULL;
 JMesh *obj2 = NULL;
 JMesh *obj3 = NULL;
 JMesh *obj4 = NULL;
-
+JMesh *objCylinder = NULL;
 
 JCamera* shadowCamera = NULL;
 JCamera* worldCamera;
@@ -142,6 +142,15 @@ int initObjects()
 	tmpNormal[1] = 1;
 	tmpNormal[2] = 0;
 
+	objCylinder = new JMesh();
+	if(makeCylinder(1,3,3,2,*objCylinder)!=0)
+		return -1;
+	if(objCylinder->refreshVertexIndexBuffer() != 0)
+		return -1;
+	objCylinder->position[0] = 3;
+	objCylinder->position[1] = 0;
+	objCylinder->material = matDiffuse;
+
 	objTable = new JMesh();
 	if( makePlane(10, 10, 1, 1, tmpNormal, *objTable, false ) != 0 )
 	{
@@ -152,7 +161,7 @@ int initObjects()
 	objTable->position[1] = -1;
 	objTable->material = matTable;
 
-	unsigned int smoothness2 = 300;
+	unsigned int smoothness2 = 10;
 	float radius2 = 1;
 
 	obj1 = new JMesh();
@@ -286,6 +295,7 @@ int init()
 	worldLevel->pushMesh( obj1 );
 	worldLevel->pushMesh( obj2 );
 	worldLevel->pushMesh( objTable );
+	//worldLevel->pushMesh( objCylinder );
 	worldLevel->pushCamera( worldCamera );
 	worldLevel->shadowCamera = shadowCamera;
 	worldLevel->shadowShader = &shaderDirShadow;

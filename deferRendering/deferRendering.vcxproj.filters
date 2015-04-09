@@ -54,6 +54,9 @@
     <ClCompile Include="JGlobalVariables.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="JSkinCluster.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JMesh.h">
@@ -87,6 +90,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="JGlobalVariables.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JSkinCluster.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
