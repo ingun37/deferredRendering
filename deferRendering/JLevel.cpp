@@ -35,12 +35,12 @@ int JLevel::initJLevel( JProgramManager& argMngProg )
 //after this, textures attached to fbo would be filled.
 int JLevel::draw()
 {
+	//-------------shadow depth rendering
 	JFrameBufferObject *shadowFBO = NULL;
 	JMatrix44 shadowPV;
 	if( shadowCamera && shadowShader)
 	{
 		shadowFBO = shadowCamera->targetFBO;
-
 		shadowPV = shadowCamera->proj * shadowCamera->view;
 		if(shadowFBO)
 		{
@@ -65,6 +65,7 @@ int JLevel::draw()
 		}
 	}
 
+	//-------------------actual rendering
 	for( unsigned int ci=0 ; ci<cameras.size() ; ci++ )
 	{
 		JCamera* camera = cameras[ci];
@@ -127,8 +128,6 @@ int JLevel::draw()
 					mesh->draw();
 				}
 			}
-
-			
 			fbo->unbind();
 		}
 		else
@@ -190,6 +189,9 @@ int JLevel::draw()
 			}
 		}
 	}
+
+	//-------------debug rendering
+
 	return 0;
 }
 

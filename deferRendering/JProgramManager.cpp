@@ -419,3 +419,8 @@ int JProgramManager::setUniformVariables_FinalDeferred( JMatrix44 mvp, JVector3 
 	glUniform4f( shaderinfo->lEyePos, eyepos[0], eyepos[1], eyepos[2], 0 );
 	return 0;
 }
+
+int JProgramManager::initProgramManager()
+{
+	return 0;
+}

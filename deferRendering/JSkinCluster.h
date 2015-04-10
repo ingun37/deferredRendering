@@ -5,6 +5,7 @@ typedef struct _vtxWeight
 {
 	unsigned int vIdx;
 	float weight;
+	_vtxWeight( unsigned int _vidx, float _w ):vIdx(_vidx),weight(_w){}
 } vtxWeight;
 
 class JSkinCluster

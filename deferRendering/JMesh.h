@@ -36,6 +36,7 @@ class JMesh
 {
 public:
 	int tag;
+
 	vector<JVertex> vertices;
 	vector<unsigned int> indices;
 	JMaterial* material;

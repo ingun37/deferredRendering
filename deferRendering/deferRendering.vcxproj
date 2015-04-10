@@ -81,6 +81,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="JActor.cpp" />
+    <ClCompile Include="JBone.cpp" />
     <ClCompile Include="JCamera.cpp" />
     <ClCompile Include="JFBOManager.cpp" />
     <ClCompile Include="JGlobalVariables.cpp" />
@@ -92,10 +94,13 @@
     <ClCompile Include="JShape.cpp" />
     <ClCompile Include="JSingleton.cpp" />
     <ClCompile Include="JSkinCluster.cpp" />
+    <ClCompile Include="JSkinSkin.cpp" />
     <ClCompile Include="JTextureManager.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="JActor.h" />
+    <ClInclude Include="JBone.h" />
     <ClInclude Include="JCamera.h" />
     <ClInclude Include="JFBOManager.h" />
     <ClInclude Include="JGlobalVariables.h" />
@@ -107,6 +112,7 @@
     <ClInclude Include="JLinearAlgebra.h" />
     <ClInclude Include="JSingleton.h" />
     <ClInclude Include="JSkinCluster.h" />
+    <ClInclude Include="JSkinSkin.h" />
     <ClInclude Include="JTextureManager.h" />
   </ItemGroup>
   <ItemGroup>

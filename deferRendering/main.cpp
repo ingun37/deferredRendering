@@ -9,6 +9,8 @@
 #include "JCamera.h"
 #include "JFBOManager.h"
 #include "JGlobalVariables.h"
+#include "JActor.h"
+
 #define GLEW_STATIC
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -16,6 +18,7 @@
 #include <string>
 
 #include <time.h>
+
 
 using namespace std;
 
@@ -51,7 +54,8 @@ JMesh *obj1 = NULL;
 JMesh *obj2 = NULL;
 JMesh *obj3 = NULL;
 JMesh *obj4 = NULL;
-JMesh *objCylinder = NULL;
+
+JActor *sausage = NULL;
 
 JCamera* shadowCamera = NULL;
 JCamera* worldCamera;
@@ -75,6 +79,7 @@ int initManagers()
 {
 	int err = 0;
 	err |= mngFBO.initFBOManager( mngTex );
+	err |= mngProgram.initProgramManager();
 	//TODO : initmanagers
 	//mngTex.init
 	//mngProgram.init
@@ -142,14 +147,17 @@ int initObjects()
 	tmpNormal[1] = 1;
 	tmpNormal[2] = 0;
 
-	objCylinder = new JMesh();
-	if(makeCylinder(1,3,3,2,*objCylinder)!=0)
+	sausage = new JActor();
+
+	if(makeSausage(3,1,10,2,2,*sausage) != 0)
 		return -1;
-	if(objCylinder->refreshVertexIndexBuffer() != 0)
-		return -1;
-	objCylinder->position[0] = 3;
-	objCylinder->position[1] = 0;
-	objCylinder->material = matDiffuse;
+
+	//sausage->meshes[0]->position[0] = 3;
+	sausage->meshes[0]->material = matTable;
+
+	//sausage->meshes[1]->position[0] = 5;
+	sausage->meshes[1]->material = matTable;
+	sausage->meshes[2]->material = matTable;
 
 	objTable = new JMesh();
 	if( makePlane(10, 10, 1, 1, tmpNormal, *objTable, false ) != 0 )
@@ -295,7 +303,9 @@ int init()
 	worldLevel->pushMesh( obj1 );
 	worldLevel->pushMesh( obj2 );
 	worldLevel->pushMesh( objTable );
-	//worldLevel->pushMesh( objCylinder );
+	worldLevel->pushMesh( sausage->meshes[0] );
+	worldLevel->pushMesh( sausage->meshes[1] );
+	worldLevel->pushMesh( sausage->meshes[2] );
 	worldLevel->pushCamera( worldCamera );
 	worldLevel->shadowCamera = shadowCamera;
 	worldLevel->shadowShader = &shaderDirShadow;

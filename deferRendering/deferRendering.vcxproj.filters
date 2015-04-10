@@ -57,6 +57,15 @@
     <ClCompile Include="JSkinCluster.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="JActor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JBone.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="JSkinSkin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JMesh.h">
@@ -93,6 +102,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="JSkinCluster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JActor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JBone.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JSkinSkin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

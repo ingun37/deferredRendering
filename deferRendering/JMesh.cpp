@@ -60,7 +60,7 @@ GL_DYNAMIC_COPY Buffer contents will be updated
 int JVBO::setVBO( void* data )
 {
 	glBindVertexArray(vao);
-
+	//TODO update subdata.
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferData(GL_ARRAY_BUFFER, vertexNum * structSize, data, GL_STATIC_DRAW);
 	for(int i=0;i<JVERTEXATTNUM;i++)

@@ -206,7 +206,7 @@ int makePlane(float widthLen, float heightLen, unsigned int widthSeg, unsigned i
 #define cylinderHNum(SG) (SG+1)
 #define cylinderVNum(SM,SG) ((cylinderCNum(SM)*cylinderHNum(SG)) + (2*(cylinderCNum(SM)-1)))
 #define cylinderINum(SM,SG) ((((cylinderCNum(SM)-1)*(SG))*6) + (((cylinderCNum(SM)-3)*3)*2))
-int makeCylinder( float radius, unsigned int smoothness, float length, unsigned int segment, JMesh& mesh )
+int makeCylinder( float radius, unsigned int smoothness, float length, unsigned int segment, JMesh& mesh, float yBase )
 {
 	unsigned long pnum = cylinderVNum(smoothness,segment);
 	unsigned long idxnum = cylinderINum(smoothness,segment);
@@ -230,17 +230,17 @@ int makeCylinder( float radius, unsigned int smoothness, float length, unsigned 
 		for (unsigned int i=0;i<circlenum-1;i++)
 		{
 			tmpvertices[cnt].position[0] = cosf(tmpangle * i) * radius;
-			tmpvertices[cnt].position[1] = length/2;
+			tmpvertices[cnt].position[1] = -length/2 + yBase;
 			tmpvertices[cnt].position[2] = sinf(tmpangle * i) * radius;
 
 			tmpvertices[cnt].normal[0] = 0;
-			tmpvertices[cnt].normal[1] = 1;
+			tmpvertices[cnt].normal[1] = -1;
 			tmpvertices[cnt].normal[2] = 0;
 
 			tmpvertices[cnt].uv[0] = 0;
 			tmpvertices[cnt].uv[1] = 0;
 
-			tmpvertices[cnt].diffuse[0] = 1;
+			tmpvertices[cnt].diffuse[0] = 0;
 			tmpvertices[cnt].diffuse[1] = 0;
 			tmpvertices[cnt].diffuse[2] = 0;
 			tmpvertices[cnt].diffuse[3] = 1;
@@ -248,7 +248,7 @@ int makeCylinder( float radius, unsigned int smoothness, float length, unsigned 
 		}
 		for(unsigned int i=0;i<verticalNum;i++)
 		{
-			tmpheight = (length/2) - ((length/(verticalNum-1))*i);
+			tmpheight = -(length/2) + ((length/(verticalNum-1))*i) + yBase;
 			for(unsigned int j=0;j<circlenum;j++)
 			{
 				tmpvertices[cnt].position[0] = cosf(tmpangle * j) * radius;
@@ -264,7 +264,7 @@ int makeCylinder( float radius, unsigned int smoothness, float length, unsigned 
 
 				tmpvertices[cnt].diffuse[0] = 0;
 				tmpvertices[cnt].diffuse[1] = 0;
-				tmpvertices[cnt].diffuse[2] = abs(sinf(tmpangle * j));
+				tmpvertices[cnt].diffuse[2] = 0;
 				tmpvertices[cnt].diffuse[3] = 1;
 
 				cnt++;
@@ -273,18 +273,18 @@ int makeCylinder( float radius, unsigned int smoothness, float length, unsigned 
 		for (unsigned int i=0;i<circlenum-1;i++)
 		{
 			tmpvertices[cnt].position[0] = -cosf(tmpangle * i) * radius;
-			tmpvertices[cnt].position[1] = -length/2;
+			tmpvertices[cnt].position[1] = length/2 + yBase;
 			tmpvertices[cnt].position[2] = sinf(tmpangle * i) * radius;
 
 			tmpvertices[cnt].normal[0] = 0;
-			tmpvertices[cnt].normal[1] = -1;
+			tmpvertices[cnt].normal[1] = 1;
 			tmpvertices[cnt].normal[2] = 0;
 
 			tmpvertices[cnt].uv[0] = 0;
 			tmpvertices[cnt].uv[1] = 0;
 
 			tmpvertices[cnt].diffuse[0] = 0;
-			tmpvertices[cnt].diffuse[1] = 1;
+			tmpvertices[cnt].diffuse[1] = 0;
 			tmpvertices[cnt].diffuse[2] = 0;
 			tmpvertices[cnt].diffuse[3] = 1;
 			cnt++;
@@ -344,5 +344,160 @@ int makeCylinder( float radius, unsigned int smoothness, float length, unsigned 
 
 	//delete [] tmpvertices;
 	//delete [] tmpIndices;
+	return 0;
+}
+
+#define weightEquMid(SG,X) ((1 - abs( (-2.f/(SG))*(X) + 1 ))*0.5 + 0.5) //0.5~1~0.5
+#define weightEquPrev(SG,X) ((-1.f/(SG)) * (X) + 0.5) //0.5~0
+#define weightEquNext(SG,X) (( 1.f/(SG)) * (X) - 0.5) //0~0.5
+
+int makeSausage(int bonenum, float radius, unsigned int cySegnum, int cySmooth, float cylen, JActor& actor)
+{
+	
+
+	actor.allBones.reserve(bonenum);
+	for(int i=0;i<bonenum;i++)
+	{
+		JBone tmpBone;
+		tmpBone.upperBoneIdx = i==0?0:i-1;
+		tmpBone.axis[2] = 1;
+		tmpBone.pos[1] = i==0?0:cylen;
+		actor.allBones.push_back( tmpBone );
+		//TODO : avoid copy
+	}
+
+	std::vector<vtxWeight> beginWeightsPerVtxs;
+	std::vector<vtxWeight> midWeightsPerVtxs;
+	std::vector<vtxWeight> endWeightsPerVtxs;
+
+	unsigned int endNum = cylinderCNum(cySmooth) - 1;
+	unsigned int sliceNum = endNum + 1;
+	unsigned int cnt=0;
+
+	unsigned int meshVNum = cylinderVNum(cySmooth,cySegnum);
+	unsigned int halfMeshVNum = ((cySegnum+1)/2)*sliceNum + endNum;
+
+	beginWeightsPerVtxs.reserve( halfMeshVNum );
+	midWeightsPerVtxs.reserve( meshVNum );
+	endWeightsPerVtxs.reserve( halfMeshVNum );
+
+	//begining bone cluster..........
+	for(int j=0;j<endNum;j++)
+		beginWeightsPerVtxs.push_back(vtxWeight(cnt++,0.5));
+
+	for(int j=0;j<((cySegnum+1)/2);j++)
+	{
+		float weight = weightEquPrev(cySegnum,j);
+		for( int k=0;k<sliceNum;k++ )
+			beginWeightsPerVtxs.push_back(vtxWeight(cnt++,weight));
+	}
+
+	if( halfMeshVNum != cnt )
+		puts("err!!!err!!!err!!!");
+	cnt=0;
+
+	//mid bone cluster..........
+	for(int j=0;j<endNum;j++)
+		midWeightsPerVtxs.push_back(vtxWeight(cnt++,0));
+
+	for(int j=0;j<cySegnum+1;j++)
+	{
+		float weight = weightEquMid(cySegnum,j);
+		for( int k=0;k<sliceNum;k++ )
+			midWeightsPerVtxs.push_back(vtxWeight(cnt++,weight));
+	}
+
+	for(int j=0;j<endNum;j++)
+		midWeightsPerVtxs.push_back(vtxWeight(cnt++,0));
+
+	if( meshVNum != cnt )
+		puts("err!!!err!!!err!!!2");
+	cnt=0;
+
+	//end bone cluster..........
+	unsigned int baseCnt = meshVNum - halfMeshVNum;
+	for(int j=((cySegnum+1)/2)+1;j<cySegnum+1;j++)
+	{
+		float weight = weightEquNext(cySegnum,j);
+		for( int k=0;k<sliceNum;k++ )
+			endWeightsPerVtxs.push_back(vtxWeight(baseCnt + (cnt++),weight));
+	}
+
+	for(int j=0;j<endNum;j++)
+		endWeightsPerVtxs.push_back(vtxWeight(baseCnt + (cnt++),0.5));
+
+	if( halfMeshVNum != cnt )
+		puts("err!!!err!!!err!!!3");
+
+	cnt=0;
+
+	//TODO : consider for sharing skinners for same sausages
+	JSkinSkin* skinners = new JSkinSkin[bonenum];
+	actor.skinners.reserve(bonenum);
+	for(int i=0;i<bonenum;i++)
+	{
+		JSkinSkin& skinner = skinners[i];
+		skinner.meshIdx = i;
+		
+		skinner.clusters.reserve(3);
+		skinner.clusters.push_back( JSkinCluster() );
+		skinner.clusters.push_back( JSkinCluster() );
+		skinner.clusters.push_back( JSkinCluster() );
+		
+		//--------
+		JSkinCluster& prevSkinCluster = skinner.clusters[0];
+		prevSkinCluster.skelIdx = max(0,i-1);
+		prevSkinCluster.affectingVtxIdxs.reserve( halfMeshVNum );
+
+		for(int j=0;j<halfMeshVNum;j++)
+			prevSkinCluster.affectingVtxIdxs.push_back( beginWeightsPerVtxs[j] );
+
+		//-------
+		JSkinCluster& midSkinCluster = skinner.clusters[1];
+		midSkinCluster.skelIdx = i;
+		midSkinCluster.affectingVtxIdxs.reserve( meshVNum );
+
+		for(int j=0;j<meshVNum;j++)
+			midSkinCluster.affectingVtxIdxs.push_back( midWeightsPerVtxs[j] );
+
+		//---------
+		JSkinCluster& nextSkinCluster = skinner.clusters[2];
+		nextSkinCluster.skelIdx = min(bonenum-1,i+1);
+		nextSkinCluster.affectingVtxIdxs.reserve( halfMeshVNum );
+
+		for(int j=0;j<halfMeshVNum;j++)
+			nextSkinCluster.affectingVtxIdxs.push_back( endWeightsPerVtxs[j] );
+
+		actor.skinners.push_back(&skinner);
+	}
+
+	JMesh* meshes = new JMesh[bonenum];
+	actor.meshes.reserve(bonenum);
+	for(int i=0;i<bonenum;i++)
+	{
+		makeCylinder(radius,cySmooth,cylen,cySegnum,meshes[i],cylen/2 + i*cylen);
+		actor.meshes.push_back(&meshes[i]);
+	}
+
+//testcode
+	for( int i=0;i<actor.skinners.size() ;i++)
+	{
+		JSkinSkin& skinner = *actor.skinners[i];
+
+		JMesh& skinningMesh = *actor.meshes[skinner.meshIdx];
+
+		for( int j=0;j<skinner.clusters[0].affectingVtxIdxs.size();j++)
+		{
+			vtxWeight& vwLink = skinner.clusters[0].affectingVtxIdxs[j];
+			skinningMesh.vertices[vwLink.vIdx].diffuse[0] = skinningMesh.vertices[vwLink.vIdx].diffuse[1] = skinningMesh.vertices[vwLink.vIdx].diffuse[2] = vwLink.weight;
+		}
+	}
+
+
+	for(int i=0;i<bonenum;i++)
+	{
+		meshes[i].refreshVertexIndexBuffer();
+	}
+
 	return 0;
 }

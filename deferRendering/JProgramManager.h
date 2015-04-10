@@ -83,12 +83,9 @@ public:
 	}
 };
 
-typedef std::map<string, shaderInfo*> mapProgram;
-
 class JFrameBufferObject;
 class JProgramManager
 {
-		mapProgram programs;
 		int makeShader(char* path, GLenum type, GLint* perror, GLuint& shaderID);
 		int makeVertexShader(char* path, GLint *perror, GLuint& shaderID);
 		int makeFragmentShader(char* path, GLint *perror, GLuint& shaderID);
@@ -96,6 +93,8 @@ class JProgramManager
 public:
 		static unsigned int currentlyRunningProgram;
 		static const shaderInfo* currentlyRunningInfo;
+
+		int initProgramManager();
 
 		int useProgram(const shaderInfo* aShaderInfo);
 
