@@ -238,3 +238,15 @@ int JMesh::reserveIndexLen(const unsigned int len)
 	indices.reserve( len );
 	return 0;
 }
+
+int JMesh::resetVBData()
+{
+	int result;
+	if( jvbo.vbo > 0 )
+		result = jvbo.setVBO( &(vertices[0]) );//TODO : subdata
+
+	if(result != 0)
+		return -1;
+
+	return 0;
+}

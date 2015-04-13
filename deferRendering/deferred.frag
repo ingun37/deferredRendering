@@ -1,9 +1,9 @@
 #version 430 core
 
-layout (location = 5) uniform sampler2D inTex;
+layout (location = 2) uniform sampler2D inTex;
 
-layout (location = 6) uniform mat4 shadowPV;
-layout (location = 7) uniform sampler2D shadowTex;
+layout (location = 3) uniform mat4 shadowPV;
+layout (location = 4) uniform sampler2D shadowTex;
 
 in VS_OUT
 {

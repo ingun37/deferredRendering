@@ -54,7 +54,7 @@ int makeSphere( float radius, unsigned int smoothness, JMesh& mesh )
 				tmpvertices[cnt].diffuse[1] = 1;
 				tmpvertices[cnt].diffuse[2] = sinf(tmpangle * j);
 				tmpvertices[cnt].diffuse[3] = 1;
-
+				tmpvertices[cnt].skinmat1 = JMatrix44::GetIdentityMatrix();
 				cnt++;
 			}
 		}
@@ -154,6 +154,7 @@ int makePlane(float widthLen, float heightLen, unsigned int widthSeg, unsigned i
 
 			vertices[idx].uv[0] = ((float)j)/(widthvnum-1);
 			vertices[idx].uv[1] = ((float)i)/(heightvnum-1);
+			vertices[idx].skinmat1 = JMatrix44::GetIdentityMatrix();
 
 			mesh.pushVertex( vertices[idx] );
 		}
@@ -244,6 +245,7 @@ int makeCylinder( float radius, unsigned int smoothness, float length, unsigned 
 			tmpvertices[cnt].diffuse[1] = 0;
 			tmpvertices[cnt].diffuse[2] = 0;
 			tmpvertices[cnt].diffuse[3] = 1;
+			tmpvertices[cnt].skinmat1 = JMatrix44::GetIdentityMatrix();
 			cnt++;
 		}
 		for(unsigned int i=0;i<verticalNum;i++)
@@ -266,7 +268,7 @@ int makeCylinder( float radius, unsigned int smoothness, float length, unsigned 
 				tmpvertices[cnt].diffuse[1] = 0;
 				tmpvertices[cnt].diffuse[2] = 0;
 				tmpvertices[cnt].diffuse[3] = 1;
-
+				tmpvertices[cnt].skinmat1 = JMatrix44::GetIdentityMatrix();
 				cnt++;
 			}
 		}
@@ -287,6 +289,7 @@ int makeCylinder( float radius, unsigned int smoothness, float length, unsigned 
 			tmpvertices[cnt].diffuse[1] = 0;
 			tmpvertices[cnt].diffuse[2] = 0;
 			tmpvertices[cnt].diffuse[3] = 1;
+			tmpvertices[cnt].skinmat1 = JMatrix44::GetIdentityMatrix();
 			cnt++;
 		}
 		if(cnt != pnum)
@@ -355,14 +358,14 @@ int makeSausage(int bonenum, float radius, unsigned int cySegnum, int cySmooth, 
 {
 	
 
-	actor.allBones.reserve(bonenum);
+	actor.allBonesUpperBase.reserve(bonenum);
 	for(int i=0;i<bonenum;i++)
 	{
 		JBone tmpBone;
-		tmpBone.upperBoneIdx = i==0?0:i-1;
+		tmpBone.upperBoneIdx = i-1;
 		tmpBone.axis[2] = 1;
 		tmpBone.pos[1] = i==0?0:cylen;
-		actor.allBones.push_back( tmpBone );
+		actor.allBonesUpperBase.push_back( tmpBone );
 		//TODO : avoid copy
 	}
 
@@ -471,11 +474,37 @@ int makeSausage(int bonenum, float radius, unsigned int cySegnum, int cySmooth, 
 		actor.skinners.push_back(&skinner);
 	}
 
+	//getting j2m, m2j bind matrix.
+	actor.bindJ2M.reserve(bonenum);
+	actor.bindM2J.reserve(bonenum);
+	actor.currJ2M.reserve(bonenum);
+	for(int i=0;i<bonenum;i++)
+	{
+		JMatrix44 j2m = JMatrix44::GetIdentityMatrix();
+		JMatrix44 m2j = JMatrix44::GetIdentityMatrix();
+
+		int upperBoneIdx = i;
+		int currBoneIdx = i;
+
+		while(upperBoneIdx != -1)
+		{
+			currBoneIdx = upperBoneIdx;
+			j2m = j2m * actor.allBonesUpperBase[currBoneIdx].getTransform();
+			upperBoneIdx = actor.allBonesUpperBase[currBoneIdx].upperBoneIdx;
+		}
+
+		JMatrix44::InverseMatrix( &j2m[0][0], &m2j[0][0] );
+		actor.bindJ2M.push_back(j2m);
+		actor.bindM2J.push_back(m2j);
+		//todo avoid copy
+		actor.currJ2M.push_back(JMatrix44::GetIdentityMatrix());
+	}
+
 	JMesh* meshes = new JMesh[bonenum];
 	actor.meshes.reserve(bonenum);
 	for(int i=0;i<bonenum;i++)
 	{
-		makeCylinder(radius,cySmooth,cylen,cySegnum,meshes[i],cylen/2 + i*cylen);
+		makeCylinder(radius,cySmooth,cylen,cySegnum,meshes[i],cylen/2 + i*cylen);//TODO : optimizing skinning : no yBase could work.
 		actor.meshes.push_back(&meshes[i]);
 	}
 
@@ -486,18 +515,19 @@ int makeSausage(int bonenum, float radius, unsigned int cySegnum, int cySmooth, 
 
 		JMesh& skinningMesh = *actor.meshes[skinner.meshIdx];
 
-		for( int j=0;j<skinner.clusters[0].affectingVtxIdxs.size();j++)
+		for( int j=0;j<skinner.clusters[2].affectingVtxIdxs.size();j++)
 		{
-			vtxWeight& vwLink = skinner.clusters[0].affectingVtxIdxs[j];
+			vtxWeight& vwLink = skinner.clusters[2].affectingVtxIdxs[j];
+			//testcode TODO : 
 			skinningMesh.vertices[vwLink.vIdx].diffuse[0] = skinningMesh.vertices[vwLink.vIdx].diffuse[1] = skinningMesh.vertices[vwLink.vIdx].diffuse[2] = vwLink.weight;
 		}
 	}
-
 
 	for(int i=0;i<bonenum;i++)
 	{
 		meshes[i].refreshVertexIndexBuffer();
 	}
 
+	
 	return 0;
 }

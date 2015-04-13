@@ -177,11 +177,11 @@ int JProgramManager::setProgram_Deferred(shaderInfo_Deferred& info, char* vpath,
 	if(makeProgram(info.v, info.f, info.p) != 0)
 		return -1;
 
-	info.lmvp = 4;
-	info.ltex = 5;
-	info.lShadowPV = 6;
-	info.lShadowTex = 7;
-	info.lTrans = 8;
+	info.lmvp = 0;
+	info.lTrans = 1;
+	info.ltex = 2;
+	info.lShadowPV = 3;
+	info.lShadowTex = 4;
 
 	if(info.p > 0)
 	{

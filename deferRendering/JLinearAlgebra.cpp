@@ -193,47 +193,166 @@ JMatrix44 JMatrix44::operator* ( const JMatrix44& m ) const
 	return ret;
 }
 
+bool JMatrix44::InverseMatrix(const float m[16], float invOut[16])
+{
+	float inv[16], det;
+	int i;
+
+	inv[0] = m[5]  * m[10] * m[15] - 
+		m[5]  * m[11] * m[14] - 
+		m[9]  * m[6]  * m[15] + 
+		m[9]  * m[7]  * m[14] +
+		m[13] * m[6]  * m[11] - 
+		m[13] * m[7]  * m[10];
+
+	inv[4] = -m[4]  * m[10] * m[15] + 
+		m[4]  * m[11] * m[14] + 
+		m[8]  * m[6]  * m[15] - 
+		m[8]  * m[7]  * m[14] - 
+		m[12] * m[6]  * m[11] + 
+		m[12] * m[7]  * m[10];
+
+	inv[8] = m[4]  * m[9] * m[15] - 
+		m[4]  * m[11] * m[13] - 
+		m[8]  * m[5] * m[15] + 
+		m[8]  * m[7] * m[13] + 
+		m[12] * m[5] * m[11] - 
+		m[12] * m[7] * m[9];
+
+	inv[12] = -m[4]  * m[9] * m[14] + 
+		m[4]  * m[10] * m[13] +
+		m[8]  * m[5] * m[14] - 
+		m[8]  * m[6] * m[13] - 
+		m[12] * m[5] * m[10] + 
+		m[12] * m[6] * m[9];
+
+	inv[1] = -m[1]  * m[10] * m[15] + 
+		m[1]  * m[11] * m[14] + 
+		m[9]  * m[2] * m[15] - 
+		m[9]  * m[3] * m[14] - 
+		m[13] * m[2] * m[11] + 
+		m[13] * m[3] * m[10];
+
+	inv[5] = m[0]  * m[10] * m[15] - 
+		m[0]  * m[11] * m[14] - 
+		m[8]  * m[2] * m[15] + 
+		m[8]  * m[3] * m[14] + 
+		m[12] * m[2] * m[11] - 
+		m[12] * m[3] * m[10];
+
+	inv[9] = -m[0]  * m[9] * m[15] + 
+		m[0]  * m[11] * m[13] + 
+		m[8]  * m[1] * m[15] - 
+		m[8]  * m[3] * m[13] - 
+		m[12] * m[1] * m[11] + 
+		m[12] * m[3] * m[9];
+
+	inv[13] = m[0]  * m[9] * m[14] - 
+		m[0]  * m[10] * m[13] - 
+		m[8]  * m[1] * m[14] + 
+		m[8]  * m[2] * m[13] + 
+		m[12] * m[1] * m[10] - 
+		m[12] * m[2] * m[9];
+
+	inv[2] = m[1]  * m[6] * m[15] - 
+		m[1]  * m[7] * m[14] - 
+		m[5]  * m[2] * m[15] + 
+		m[5]  * m[3] * m[14] + 
+		m[13] * m[2] * m[7] - 
+		m[13] * m[3] * m[6];
+
+	inv[6] = -m[0]  * m[6] * m[15] + 
+		m[0]  * m[7] * m[14] + 
+		m[4]  * m[2] * m[15] - 
+		m[4]  * m[3] * m[14] - 
+		m[12] * m[2] * m[7] + 
+		m[12] * m[3] * m[6];
+
+	inv[10] = m[0]  * m[5] * m[15] - 
+		m[0]  * m[7] * m[13] - 
+		m[4]  * m[1] * m[15] + 
+		m[4]  * m[3] * m[13] + 
+		m[12] * m[1] * m[7] - 
+		m[12] * m[3] * m[5];
+
+	inv[14] = -m[0]  * m[5] * m[14] + 
+		m[0]  * m[6] * m[13] + 
+		m[4]  * m[1] * m[14] - 
+		m[4]  * m[2] * m[13] - 
+		m[12] * m[1] * m[6] + 
+		m[12] * m[2] * m[5];
+
+	inv[3] = -m[1] * m[6] * m[11] + 
+		m[1] * m[7] * m[10] + 
+		m[5] * m[2] * m[11] - 
+		m[5] * m[3] * m[10] - 
+		m[9] * m[2] * m[7] + 
+		m[9] * m[3] * m[6];
+
+	inv[7] = m[0] * m[6] * m[11] - 
+		m[0] * m[7] * m[10] - 
+		m[4] * m[2] * m[11] + 
+		m[4] * m[3] * m[10] + 
+		m[8] * m[2] * m[7] - 
+		m[8] * m[3] * m[6];
+
+	inv[11] = -m[0] * m[5] * m[11] + 
+		m[0] * m[7] * m[9] + 
+		m[4] * m[1] * m[11] - 
+		m[4] * m[3] * m[9] - 
+		m[8] * m[1] * m[7] + 
+		m[8] * m[3] * m[5];
+
+	inv[15] = m[0] * m[5] * m[10] - 
+		m[0] * m[6] * m[9] - 
+		m[4] * m[1] * m[10] + 
+		m[4] * m[2] * m[9] + 
+		m[8] * m[1] * m[6] - 
+		m[8] * m[2] * m[5];
+
+	det = m[0] * inv[0] + m[1] * inv[4] + m[2] * inv[8] + m[3] * inv[12];
+
+	if (det == 0)
+		return false;
+
+	det = 1.0 / det;
+
+	for (i = 0; i < 16; i++)
+		invOut[i] = inv[i] * det;
+
+	return true;
+}
+
+#define defAtt(szVname,elenum,gltype,typeSize,bNormalize)\
+	memset(fixedparameters[locationCnt].varname, 0, sizeof(fixedparameters[locationCnt].varname));\
+	strncpy(fixedparameters[locationCnt].varname, szVname, strlen(szVname));\
+	fixedparameters[locationCnt].location = locationCnt;\
+	fixedparameters[locationCnt].elementnum = elenum;\
+	fixedparameters[locationCnt].type = gltype;\
+	fixedparameters[locationCnt].willNormalize = bNormalize;\
+	fixedparameters[locationCnt].offset = (unsigned char*)NULL + offsetAccu;\
+	fixedparameters[locationCnt].stride = sizeof(JVertex);\
+	offsetAccu += typeSize * elenum;\
+	locationCnt++;
+
 JVertexAttributeInfo* JVertex::getFixedVertexAttributeInfoArray(int i)
 {
 	static JVertexAttributeInfo fixedparameters[JVERTEXATTNUM];
 	static int inited = 0;
 	if(inited == 0)
 	{
-		memset(fixedparameters[0].varname, 0, sizeof(fixedparameters[0].varname));
-		strncpy(fixedparameters[0].varname, "position", 8);
-		fixedparameters[0].location = 0;
-		fixedparameters[0].elementnum = 3;
-		fixedparameters[0].type = GL_FLOAT;
-		fixedparameters[0].willNormalize = 0;
-		fixedparameters[0].offset = (unsigned char*)NULL + 0;
-		fixedparameters[0].stride = sizeof(JVertex);
+		int locationCnt = 0;
+		int offsetAccu = 0;
 
-		memset(fixedparameters[1].varname, 0, sizeof(fixedparameters[1].varname));
-		strncpy(fixedparameters[1].varname, "normal", 6);
-		fixedparameters[1].location = 1;
-		fixedparameters[1].elementnum = 3;
-		fixedparameters[1].type = GL_FLOAT;
-		fixedparameters[1].willNormalize = 1;
-		fixedparameters[1].offset = (unsigned char*)NULL + (sizeof(float) * 3);
-		fixedparameters[1].stride = sizeof(JVertex);
+		defAtt("position\0",3,GL_FLOAT,sizeof(float),0);
+		defAtt("normal\0",3,GL_FLOAT,sizeof(float),1);
+		defAtt("uv\0",2,GL_FLOAT,sizeof(float),0);
+		defAtt("diffuse\0",4,GL_FLOAT,sizeof(float),0);
 
-		memset(fixedparameters[2].varname, 0, sizeof(fixedparameters[2].varname));
-		strncpy(fixedparameters[2].varname, "uv", 2);
-		fixedparameters[2].location = 2;
-		fixedparameters[2].elementnum = 2;
-		fixedparameters[2].type = GL_FLOAT;
-		fixedparameters[2].willNormalize = 0;
-		fixedparameters[2].offset = (unsigned char*)NULL + (sizeof(float) * 6);
-		fixedparameters[2].stride = sizeof(JVertex);
-
-		memset(fixedparameters[3].varname, 0, sizeof(fixedparameters[3].varname));
-		strncpy(fixedparameters[3].varname, "diffuse", 2);
-		fixedparameters[3].location = 3;
-		fixedparameters[3].elementnum = 4;
-		fixedparameters[3].type = GL_FLOAT;
-		fixedparameters[3].willNormalize = 0;
-		fixedparameters[3].offset = (unsigned char*)NULL + (sizeof(float) * 8);
-		fixedparameters[3].stride = sizeof(JVertex);
+		defAtt("skinmat\0",4,GL_FLOAT,sizeof(float),0);
+		defAtt("skinmat\0",4,GL_FLOAT,sizeof(float),0);
+		defAtt("skinmat\0",4,GL_FLOAT,sizeof(float),0);
+		defAtt("skinmat\0",4,GL_FLOAT,sizeof(float),0);
 
 		inited = 1;
 	}
@@ -259,9 +378,12 @@ JVertex::JVertex(float x, float y, float z, float nx, float ny, float nz, float 
 	diffuse[1] = g;
 	diffuse[2] = b;
 	diffuse[3] = a;
+
+	skinmat1 = JMatrix44::GetIdentityMatrix();
 }
 
 JVertex::JVertex()
 {
-
+	memset(this,0,sizeof(JVertex));
+	skinmat1 = JMatrix44::GetIdentityMatrix();
 }

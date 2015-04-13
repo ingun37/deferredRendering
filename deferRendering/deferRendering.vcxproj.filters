@@ -66,6 +66,9 @@
     <ClCompile Include="JSkinSkin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="JView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="JMesh.h">
@@ -111,6 +114,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="JSkinSkin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="JView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

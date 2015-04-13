@@ -96,6 +96,7 @@
     <ClCompile Include="JSkinCluster.cpp" />
     <ClCompile Include="JSkinSkin.cpp" />
     <ClCompile Include="JTextureManager.cpp" />
+    <ClCompile Include="JView.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -114,6 +115,7 @@
     <ClInclude Include="JSkinCluster.h" />
     <ClInclude Include="JSkinSkin.h" />
     <ClInclude Include="JTextureManager.h" />
+    <ClInclude Include="JView.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="deferred.frag" />

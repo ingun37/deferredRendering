@@ -317,6 +317,12 @@ int init()
 	return 0;
 }
 
+int update()
+{
+	sausage->updateActor();
+	return 0;
+}
+
 int draw()
 {
 	glClearColor( 0.5,0.5,0.5,1);
@@ -388,6 +394,17 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		screenQuad->material = finalMat;
 	}
+
+	static int gtmp = 0;
+	if (key == GLFW_KEY_F1 && action == GLFW_RELEASE)
+	{
+		gtmp = (gtmp+1)%sausage->allBonesUpperBase.size();
+	}
+
+	if (key == GLFW_KEY_F2 && action == GLFW_REPEAT)
+	{
+		sausage->allBonesUpperBase[gtmp].angle -= 0.01;
+	}
 }
 
 int main(void)
@@ -420,6 +437,7 @@ int main(void)
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
+		update();
         /* Render here */
 		draw();
         /* Swap front and back buffers */

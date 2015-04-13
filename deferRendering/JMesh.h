@@ -55,6 +55,7 @@ public:
 	int setMaterial( JMaterial* mat );
 	
 	int refreshVertexIndexBuffer();
+	int resetVBData();
 	int draw();
 	
 	int clearGLBuffers();

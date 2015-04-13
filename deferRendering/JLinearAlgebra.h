@@ -149,6 +149,7 @@ public:
 	static JMatrix44 GetViewMatrix( const JVector3& eye, const JVector3& up, const JVector3& at , JVector3* pF = 0, JVector3* pU = 0, JVector3* pR = 0);
 	static JMatrix44 GetProjectionMatrixOrthogonal( const float left, const float right, const float top, const float bottom, const float zNear, const float zFar );
 	static JMatrix44 GetProjectionMatrixPerspective( const float left, const float right, const float top, const float bottom, const float zNear, const float zFar );
+	static bool InverseMatrix( const float m[16], float invOut[16] );
 
 	JVector4& operator[]( int i ) const;
 	JMatrix44 operator*( const JMatrix44& m ) const;
@@ -174,6 +175,10 @@ enum JVERTEXATTRIBUTE
 	JVERTEXATTNORMAL,
 	JVERTEXATTUV,
 	JVERTEXATTDIFFUSE,
+	JVERTEXATTSKINMAT1_R1,
+	JVERTEXATTSKINMAT1_R2,
+	JVERTEXATTSKINMAT1_R3,
+	JVERTEXATTSKINMAT1_R4,
 	JVERTEXATTNUM
 };
 
@@ -184,7 +189,7 @@ public:
 	JVector3 normal;
 	JVector2 uv;
 	JVector4 diffuse;
-	
+	JMatrix44 skinmat1;
 
 	static JVertexAttributeInfo* getFixedVertexAttributeInfoArray(int i);
 
