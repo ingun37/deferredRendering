@@ -33,21 +33,24 @@ JTextureObject* texCheck = &texPool[0];
 JTextureObject* texWorldmap = &texPool[1];
 JTextureObject* texBlock = &texPool[2];
 JTextureObject* texPlanet2 = &texPool[3];
+JTextureObject* texNike = &texPool[4];
 //---------shaders----------
 shaderInfo_Diffuse shaderDiffusue;
 shaderInfo_TexUnlit shaderTexUnlit;
-shaderInfo_Deferred shaderDeferred;
+shaderInfo_Deferred shaderDeferred_static;
+shaderInfo_Deferred shaderDeferred_skinned;
 shaderInfo_FinalDeferred shaderFinalDeferred;
 
 shaderInfo_DirShadow shaderDirShadow;
 //-------objectsLevel-------
 JMaterial materialPool[16];
 JMaterial* matTexUnlit = &materialPool[0];
-JMaterial* matDeferred = &materialPool[1];
 JMaterial* matDiffuse = &materialPool[2];
 JMaterial *matTable = &materialPool[3];
 JMaterial *matObj2 = &materialPool[4];
 JMaterial *finalMat = &materialPool[5];
+JMaterial* matDeferred_static = &materialPool[1];
+JMaterial* matDeferred_skinned = &materialPool[6];
 
 JMesh *objTable = NULL;
 JMesh *obj1 = NULL;
@@ -99,6 +102,7 @@ int initTextures()
 	err |= mngTex.makeTexture( *texWorldmap,JTEXTURE_IMAGEFORMAT::JIMGFORMAT_BMP,"../deferRendering/earthtoon.bmp" );
 	err |= mngTex.makeTexture( *texBlock,JTEXTURE_IMAGEFORMAT::JIMGFORMAT_BMP,"../deferRendering/block.bmp" );
 	err |= mngTex.makeTexture( *texPlanet2,JTEXTURE_IMAGEFORMAT::JIMGFORMAT_BMP,"../deferRendering/planet2.bmp" );
+	err |= mngTex.makeTexture( *texNike,JTEXTURE_IMAGEFORMAT::JIMGFORMAT_BMP,"../deferRendering/nike.bmp" );
 	return err;
 }
 
@@ -107,7 +111,8 @@ int initShaders()
 	int err = 0;
 	err |= mngProgram.setProgram_Diffuse(shaderDiffusue,"../deferRendering/diffuse.vert","../deferRendering/diffuse.frag");
 	err |= mngProgram.setProgram_TexUnlit(shaderTexUnlit,"../deferRendering/texunlit.vert","../deferRendering/texunlit.frag");
-	err |= mngProgram.setProgram_Deferred(shaderDeferred,"../deferRendering/deferred.vert","../deferRendering/deferred.frag");
+	err |= mngProgram.setProgram_Deferred(shaderDeferred_static,"../deferRendering/deferred_static.vert","../deferRendering/deferred.frag");
+	err |= mngProgram.setProgram_Deferred(shaderDeferred_skinned,"../deferRendering/deferred_skinned.vert","../deferRendering/deferred.frag");
 	err |= mngProgram.setProgram_DirShadow(shaderDirShadow,"../deferRendering/dirShadow.vert","../deferRendering/dirShadow.frag");
 	err |= mngProgram.setProgram_FinalDeferred(shaderFinalDeferred,"../deferRendering/finalDeferred.vert","../deferRendering/finalDeferred.frag");
 
@@ -116,18 +121,21 @@ int initShaders()
 
 int initMaterial()
 {
-	matDeferred->texObj = texWorldmap;
-	matDeferred->shaderinfo = &shaderDeferred;
+	matDeferred_static->texObj = texWorldmap;
+	matDeferred_static->shaderinfo = &shaderDeferred_static;
+
+	matDeferred_skinned->texObj = texNike;
+	matDeferred_skinned->shaderinfo = &shaderDeferred_skinned;
 
 	matDiffuse->shaderinfo = &shaderDiffusue;
 
 	matTexUnlit->shaderinfo = &shaderTexUnlit;
 
 	matTable->texObj = texBlock;
-	matTable->shaderinfo = &shaderDeferred;
+	matTable->shaderinfo = &shaderDeferred_static;
 
 	matObj2->texObj = texPlanet2;
-	matObj2->shaderinfo = &shaderDeferred;
+	matObj2->shaderinfo = &shaderDeferred_static;
 
 	finalMat->shaderinfo = &shaderFinalDeferred;
 
@@ -152,12 +160,10 @@ int initObjects()
 	if(makeSausage(3,1,10,2,2,*sausage) != 0)
 		return -1;
 
-	//sausage->meshes[0]->position[0] = 3;
-	sausage->meshes[0]->material = matTable;
-
-	//sausage->meshes[1]->position[0] = 5;
-	sausage->meshes[1]->material = matTable;
-	sausage->meshes[2]->material = matTable;
+	//FIX rightnow!
+	sausage->meshes[0]->material = matDeferred_skinned;
+	sausage->meshes[1]->material = matDeferred_skinned;
+	sausage->meshes[2]->material = matDeferred_skinned;
 
 	objTable = new JMesh();
 	if( makePlane(10, 10, 1, 1, tmpNormal, *objTable, false ) != 0 )
@@ -185,7 +191,7 @@ int initObjects()
 		return -1;
 	obj1->position[2] = 1;
 
-	obj1->setMaterial(matDeferred);
+	obj1->setMaterial(matDeferred_static);
 
 
 	obj2 = new JMesh();

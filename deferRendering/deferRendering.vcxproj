@@ -115,11 +115,13 @@
     <ClInclude Include="JSkinCluster.h" />
     <ClInclude Include="JSkinSkin.h" />
     <ClInclude Include="JTextureManager.h" />
+    <ClInclude Include="JVertex.h" />
     <ClInclude Include="JView.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="deferred.frag" />
-    <None Include="deferred.vert" />
+    <None Include="deferred_static.vert" />
+    <None Include="deferred_skinned.vert" />
     <None Include="finalDeferred.frag" />
     <None Include="finalDeferred.vert" />
     <None Include="diffuse.frag" />
@@ -128,6 +130,9 @@
     <None Include="dirShadow.vert" />
     <None Include="texunlit.frag" />
     <None Include="texunlit.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="readme.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

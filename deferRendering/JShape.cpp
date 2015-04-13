@@ -31,6 +31,7 @@ int makeSphere( float radius, unsigned int smoothness, JMesh& mesh )
 	tmpangle = PI/(smoothness+1);
 
 	int cnt = 0;
+
 	try
 	{
 		for(unsigned int i=0;i<smoothness + 2;i++)
@@ -54,7 +55,6 @@ int makeSphere( float radius, unsigned int smoothness, JMesh& mesh )
 				tmpvertices[cnt].diffuse[1] = 1;
 				tmpvertices[cnt].diffuse[2] = sinf(tmpangle * j);
 				tmpvertices[cnt].diffuse[3] = 1;
-				tmpvertices[cnt].skinmat1 = JMatrix44::GetIdentityMatrix();
 				cnt++;
 			}
 		}
@@ -150,11 +150,12 @@ int makePlane(float widthLen, float heightLen, unsigned int widthSeg, unsigned i
 			vertices[idx].diffuse[2] = ((float)(rand()%10))/10;
 			vertices[idx].diffuse[3] = 1;
 
-			vertices[idx].normal = normal;
+			vertices[idx].normal[0] = normal[0];
+			vertices[idx].normal[1] = normal[1];
+			vertices[idx].normal[2] = normal[2];
 
 			vertices[idx].uv[0] = ((float)j)/(widthvnum-1);
 			vertices[idx].uv[1] = ((float)i)/(heightvnum-1);
-			vertices[idx].skinmat1 = JMatrix44::GetIdentityMatrix();
 
 			mesh.pushVertex( vertices[idx] );
 		}
@@ -245,7 +246,6 @@ int makeCylinder( float radius, unsigned int smoothness, float length, unsigned 
 			tmpvertices[cnt].diffuse[1] = 0;
 			tmpvertices[cnt].diffuse[2] = 0;
 			tmpvertices[cnt].diffuse[3] = 1;
-			tmpvertices[cnt].skinmat1 = JMatrix44::GetIdentityMatrix();
 			cnt++;
 		}
 		for(unsigned int i=0;i<verticalNum;i++)
@@ -268,7 +268,6 @@ int makeCylinder( float radius, unsigned int smoothness, float length, unsigned 
 				tmpvertices[cnt].diffuse[1] = 0;
 				tmpvertices[cnt].diffuse[2] = 0;
 				tmpvertices[cnt].diffuse[3] = 1;
-				tmpvertices[cnt].skinmat1 = JMatrix44::GetIdentityMatrix();
 				cnt++;
 			}
 		}
@@ -289,7 +288,6 @@ int makeCylinder( float radius, unsigned int smoothness, float length, unsigned 
 			tmpvertices[cnt].diffuse[1] = 0;
 			tmpvertices[cnt].diffuse[2] = 0;
 			tmpvertices[cnt].diffuse[3] = 1;
-			tmpvertices[cnt].skinmat1 = JMatrix44::GetIdentityMatrix();
 			cnt++;
 		}
 		if(cnt != pnum)

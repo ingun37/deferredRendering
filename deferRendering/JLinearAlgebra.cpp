@@ -192,6 +192,14 @@ JMatrix44 JMatrix44::operator* ( const JMatrix44& m ) const
 
 	return ret;
 }
+//todo make them inline
+void JMatrix44::operator*=(const float f)
+{
+	r1 *= f;
+	r2 *= f;
+	r3 *= f;
+	r4 *= f;
+}
 
 bool JMatrix44::InverseMatrix(const float m[16], float invOut[16])
 {
@@ -321,69 +329,4 @@ bool JMatrix44::InverseMatrix(const float m[16], float invOut[16])
 		invOut[i] = inv[i] * det;
 
 	return true;
-}
-
-#define defAtt(szVname,elenum,gltype,typeSize,bNormalize)\
-	memset(fixedparameters[locationCnt].varname, 0, sizeof(fixedparameters[locationCnt].varname));\
-	strncpy(fixedparameters[locationCnt].varname, szVname, strlen(szVname));\
-	fixedparameters[locationCnt].location = locationCnt;\
-	fixedparameters[locationCnt].elementnum = elenum;\
-	fixedparameters[locationCnt].type = gltype;\
-	fixedparameters[locationCnt].willNormalize = bNormalize;\
-	fixedparameters[locationCnt].offset = (unsigned char*)NULL + offsetAccu;\
-	fixedparameters[locationCnt].stride = sizeof(JVertex);\
-	offsetAccu += typeSize * elenum;\
-	locationCnt++;
-
-JVertexAttributeInfo* JVertex::getFixedVertexAttributeInfoArray(int i)
-{
-	static JVertexAttributeInfo fixedparameters[JVERTEXATTNUM];
-	static int inited = 0;
-	if(inited == 0)
-	{
-		int locationCnt = 0;
-		int offsetAccu = 0;
-
-		defAtt("position\0",3,GL_FLOAT,sizeof(float),0);
-		defAtt("normal\0",3,GL_FLOAT,sizeof(float),1);
-		defAtt("uv\0",2,GL_FLOAT,sizeof(float),0);
-		defAtt("diffuse\0",4,GL_FLOAT,sizeof(float),0);
-
-		defAtt("skinmat\0",4,GL_FLOAT,sizeof(float),0);
-		defAtt("skinmat\0",4,GL_FLOAT,sizeof(float),0);
-		defAtt("skinmat\0",4,GL_FLOAT,sizeof(float),0);
-		defAtt("skinmat\0",4,GL_FLOAT,sizeof(float),0);
-
-		inited = 1;
-	}
-	if(i >= 0 && i<JVERTEXATTNUM)
-		return &(fixedparameters[i]);
-	return NULL;
-}
-
-JVertex::JVertex(float x, float y, float z, float nx, float ny, float nz, float r, float g, float b, float a, float u, float v)
-{
-	position[0] = x;
-	position[1] = y;
-	position[2] = z;
-
-	normal[0] = nx;
-	normal[1] = ny;
-	normal[2] = nz;
-
-	uv[0] = u;
-	uv[1] = v;
-
-	diffuse[0] = r;
-	diffuse[1] = g;
-	diffuse[2] = b;
-	diffuse[3] = a;
-
-	skinmat1 = JMatrix44::GetIdentityMatrix();
-}
-
-JVertex::JVertex()
-{
-	memset(this,0,sizeof(JVertex));
-	skinmat1 = JMatrix44::GetIdentityMatrix();
 }

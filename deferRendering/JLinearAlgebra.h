@@ -72,6 +72,12 @@ public:
 		return accu;
 	}
 
+	void operator *=(const float f)
+	{
+		for( int i=0 ; i < N ; i++ )
+			val[i] *= f;
+	}
+
 	JVector<N> operator *(const float f) const
 	{
 		JVector<N> v;
@@ -153,47 +159,11 @@ public:
 
 	JVector4& operator[]( int i ) const;
 	JMatrix44 operator*( const JMatrix44& m ) const;
+	void operator*=(const float f);
 	JVector4 operator*( const JVector4& v ) const;
 };
 
 
 
-typedef struct JVertexAttributeInfoRaw
-{
-	char varname[128];
-	int location;
-	int elementnum;
-	GLenum type;
-	int willNormalize;
-	GLvoid* offset;
-	int stride;
-}JVertexAttributeInfo;
 
-enum JVERTEXATTRIBUTE
-{
-	JVERTEXATTPOSITION,
-	JVERTEXATTNORMAL,
-	JVERTEXATTUV,
-	JVERTEXATTDIFFUSE,
-	JVERTEXATTSKINMAT1_R1,
-	JVERTEXATTSKINMAT1_R2,
-	JVERTEXATTSKINMAT1_R3,
-	JVERTEXATTSKINMAT1_R4,
-	JVERTEXATTNUM
-};
-
-class JVertex
-{
-public:
-	JVector3 position;
-	JVector3 normal;
-	JVector2 uv;
-	JVector4 diffuse;
-	JMatrix44 skinmat1;
-
-	static JVertexAttributeInfo* getFixedVertexAttributeInfoArray(int i);
-
-	JVertex( float x, float y, float z, float nx, float ny, float nz, float r, float g, float b, float a, float u, float v);
-	JVertex();
-};
 #endif

@@ -3,6 +3,7 @@
 
 #include "JLinearAlgebra.h"
 #include "JMaterial.h"
+#include "JVertex.h"
 
 #include <vector>
 #include <string>

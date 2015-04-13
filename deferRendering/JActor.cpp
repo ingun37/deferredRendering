@@ -43,7 +43,7 @@ int JActor::updateActor()
 			{
 				vtxWeight& vwLink = cluster.affectingVtxIdxs[linki];
 				//todo testcode
-				skinningMesh.vertices[vwLink.vIdx].skinmat1 = currJ2M[cluster.skelIdx] * bindM2J[cluster.skelIdx];
+				*(JMatrix44*)(skinningMesh.vertices[vwLink.vIdx].skinmat1) = currJ2M[cluster.skelIdx] * bindM2J[cluster.skelIdx];
 			}
 		}
 		skinningMesh.resetVBData();

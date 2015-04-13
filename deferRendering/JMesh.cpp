@@ -72,10 +72,10 @@ int JVBO::setVBO( void* data )
 			glVertexAttribPointer(
 				i,
 				attinfo->elementnum,
-				attinfo->type,
+				GL_FLOAT,//todo : initial value is float. make it flexible.
 				attinfo->willNormalize,
 				attinfo->stride,
-				attinfo->offset
+				(const void*)attinfo->offset
 				);
 			glEnableVertexAttribArray(i);
 		}

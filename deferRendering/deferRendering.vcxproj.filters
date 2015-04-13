@@ -119,6 +119,9 @@
     <ClInclude Include="JView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="JVertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="diffuse.vert">
@@ -128,9 +131,6 @@
       <Filter>shader</Filter>
     </None>
     <None Include="deferred.frag">
-      <Filter>shader</Filter>
-    </None>
-    <None Include="deferred.vert">
       <Filter>shader</Filter>
     </None>
     <None Include="texunlit.frag">
@@ -151,5 +151,16 @@
     <None Include="finalDeferred.frag">
       <Filter>shader</Filter>
     </None>
+    <None Include="deferred_skinned.vert">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="deferred_static.vert">
+      <Filter>shader</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="readme.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
