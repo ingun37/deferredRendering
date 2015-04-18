@@ -43,7 +43,23 @@ int JActor::updateActor()
 			{
 				vtxWeight& vwLink = cluster.affectingVtxIdxs[linki];
 				//todo testcode
-				*(JMatrix44*)(skinningMesh.vertices[vwLink.vIdx].skinmat1) = currJ2M[cluster.skelIdx] * bindM2J[cluster.skelIdx];
+				JMatrix44 skinningMat = currJ2M[cluster.skelIdx] * bindM2J[cluster.skelIdx];
+				//JMatrix44 skinningMat = JMatrix44::GetIdentityMatrix();
+				skinningMesh.resetSubData(JVERTEXATTSKINMAT1_R1, vwLink.vIdx, &skinningMat[0][0]);
+				skinningMesh.resetSubData(JVERTEXATTSKINMAT1_R2, vwLink.vIdx, &skinningMat[1][0]);
+				skinningMesh.resetSubData(JVERTEXATTSKINMAT1_R3, vwLink.vIdx, &skinningMat[2][0]);
+				skinningMesh.resetSubData(JVERTEXATTSKINMAT1_R4, vwLink.vIdx, &skinningMat[3][0]);
+/*
+				skinningMesh.resetSubData(JVERTEXATTSKINMAT2_R1, vwLink.vIdx, &skinningMat[0][0]);
+				skinningMesh.resetSubData(JVERTEXATTSKINMAT2_R2, vwLink.vIdx, &skinningMat[1][0]);
+				skinningMesh.resetSubData(JVERTEXATTSKINMAT2_R3, vwLink.vIdx, &skinningMat[2][0]);
+				skinningMesh.resetSubData(JVERTEXATTSKINMAT2_R4, vwLink.vIdx, &skinningMat[3][0]);
+
+				skinningMesh.resetSubData(JVERTEXATTSKINMAT3_R1, vwLink.vIdx, &skinningMat[0][0]);
+				skinningMesh.resetSubData(JVERTEXATTSKINMAT3_R2, vwLink.vIdx, &skinningMat[1][0]);
+				skinningMesh.resetSubData(JVERTEXATTSKINMAT3_R3, vwLink.vIdx, &skinningMat[2][0]);
+				skinningMesh.resetSubData(JVERTEXATTSKINMAT3_R4, vwLink.vIdx, &skinningMat[3][0]);*/
+				//*(JMatrix44*)(skinningMesh.vertices[vwLink.vIdx].skinmat1) = currJ2M[cluster.skelIdx] * bindM2J[cluster.skelIdx];
 			}
 		}
 		skinningMesh.resetVBData();

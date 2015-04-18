@@ -1,5 +1,5 @@
 #include "JMesh.h"
-
+#include <iostream>
 int JVBO::allocVBO( int aVertexNum, int aStructSize )
 {
 	structSize = aStructSize;
@@ -65,17 +65,16 @@ int JVBO::setVBO( void* data )
 	glBufferData(GL_ARRAY_BUFFER, vertexNum * structSize, data, GL_STATIC_DRAW);
 	for(int i=0;i<JVERTEXATTNUM;i++)
 	{
-		JVertexAttributeInfo* attinfo = JVertex::getFixedVertexAttributeInfoArray(i);
+		JVertexAttributeInfo* attinfo = JVertex::getFixedVertexAttributeInfoArray(i,vertexNum);
 		if(attinfo)
 		{
-			//position
 			glVertexAttribPointer(
 				i,
 				attinfo->elementnum,
 				GL_FLOAT,//todo : initial value is float. make it flexible.
 				attinfo->willNormalize,
 				attinfo->stride,
-				(const void*)attinfo->offset
+				(const void*)attinfo->offsetFirst
 				);
 			glEnableVertexAttribArray(i);
 		}
@@ -135,6 +134,7 @@ JMesh::JMesh()
 	position[1] = 0;
 	position[2] = 0;
 	position[3] = 1;
+	vbData = NULL;
 }
 
 int JMesh::pushVertex(const JVertex& vertex)
@@ -160,11 +160,15 @@ int JMesh::refreshVertexIndexBuffer()
 	if( jvbo.vbo > 0 )
 		jvbo.clear();
 
+	vbData = new char[ sizeof(JVertex) * vertices.size() ];
+	memset(vbData,0,sizeof(JVertex)*vertices.size());
+	rearrangeData();
+
 	result = jvbo.allocVBO( vertices.size(), sizeof(JVertex) );
 	if(result != 0)
 		return -1;
 
-	result = jvbo.setVBO( &(vertices[0]) );
+	result = jvbo.setVBO( vbData );
 
 	if(result != 0)
 		return -1;
@@ -243,10 +247,43 @@ int JMesh::resetVBData()
 {
 	int result;
 	if( jvbo.vbo > 0 )
-		result = jvbo.setVBO( &(vertices[0]) );//TODO : subdata
+		result = jvbo.setVBO( vbData );//TODO : subdata
 
 	if(result != 0)
 		return -1;
+
+	return 0;
+}
+
+int JMesh::rearrangeData()
+{
+	if(vertices.size()==0 || vbData == NULL)
+		return -1;
+
+	//fill position
+	
+	for(int atti=0;atti<JVERTEXATTNUM;atti++)
+	{
+		JVertexAttributeInfo& infoarr = *JVertex::getFixedVertexAttributeInfoArray(atti,vertices.size());
+		/*std::cout<<"copying "<<atti<<"'s att" <<endl;
+		std::cout<<"offsetBuffer "<< infoarr.offsetBuffer <<endl;
+		std::cout<<"chunksize "<< infoarr.chunkSize <<endl;
+		std::cout<<" "<<atti<<"'s att" <<endl;*/
+		for(int i=0;i<vertices.size();i++)
+		{
+			memcpy( vbData + infoarr.offsetBuffer + i*infoarr.chunkSize, ((char*)&vertices[i]) + infoarr.offsetObject, infoarr.nameitSize );
+		}
+	}
+	return 0;
+}
+
+int JMesh::resetSubData(JVERTEXATTRIBUTE att, unsigned int idx, void* data)
+{
+	if(vbData == NULL )
+		return -1;
+	JVertexAttributeInfo& infoarr = *JVertex::getFixedVertexAttributeInfoArray(att,vertices.size());
+
+	memcpy(vbData+infoarr.offsetBuffer + idx*infoarr.chunkSize,data,infoarr.chunkSize);
 
 	return 0;
 }

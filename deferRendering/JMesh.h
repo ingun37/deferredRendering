@@ -39,6 +39,7 @@ public:
 	int tag;
 
 	vector<JVertex> vertices;
+	char* vbData;
 	vector<unsigned int> indices;
 	JMaterial* material;
 	JVBO jvbo;
@@ -57,6 +58,8 @@ public:
 	
 	int refreshVertexIndexBuffer();
 	int resetVBData();
+	int rearrangeData();
+	int resetSubData(JVERTEXATTRIBUTE att, unsigned int idx, void* data);
 	int draw();
 	
 	int clearGLBuffers();

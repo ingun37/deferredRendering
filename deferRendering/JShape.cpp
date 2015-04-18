@@ -290,6 +290,13 @@ int makeCylinder( float radius, unsigned int smoothness, float length, unsigned 
 			tmpvertices[cnt].diffuse[3] = 1;
 			cnt++;
 		}
+
+		/*//test code..
+		JMatrix44 idm = JMatrix44::GetIdentityMatrix();
+		for(unsigned int i=0;i<pnum;i++)
+			memcpy(tmpvertices[i].skinmat1,&idm,sizeof(JMatrix44));
+			//tmpvertices[i].skinmat1 = JMatrix44::GetIdentityMatrix();
+		//*/
 		if(cnt != pnum)
 			puts("odd... not correct");
 		cnt = 0;
