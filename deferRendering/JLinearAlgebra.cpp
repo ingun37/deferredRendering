@@ -192,13 +192,15 @@ JMatrix44 JMatrix44::operator* ( const JMatrix44& m ) const
 
 	return ret;
 }
+
 //todo make them inline
-void JMatrix44::operator*=(const float f)
+JMatrix44& JMatrix44::operator*=(const float f)
 {
 	r1 *= f;
 	r2 *= f;
 	r3 *= f;
 	r4 *= f;
+	return *this;
 }
 
 bool JMatrix44::InverseMatrix(const float m[16], float invOut[16])

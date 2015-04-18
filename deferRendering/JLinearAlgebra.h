@@ -159,7 +159,7 @@ public:
 
 	JVector4& operator[]( int i ) const;
 	JMatrix44 operator*( const JMatrix44& m ) const;
-	void operator*=(const float f);
+	JMatrix44& operator*=(const float f);
 	JVector4 operator*( const JVector4& v ) const;
 };
 

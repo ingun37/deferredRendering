@@ -60,6 +60,7 @@ public:
 	int resetVBData();
 	int rearrangeData();
 	int resetSubData(JVERTEXATTRIBUTE att, unsigned int idx, void* data);
+	int zeroMemorySubDataAttribute(JVERTEXATTRIBUTE att);
 	int draw();
 	
 	int clearGLBuffers();

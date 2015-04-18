@@ -269,7 +269,7 @@ int JMesh::rearrangeData()
 		std::cout<<"offsetBuffer "<< infoarr.offsetBuffer <<endl;
 		std::cout<<"chunksize "<< infoarr.chunkSize <<endl;
 		std::cout<<" "<<atti<<"'s att" <<endl;*/
-		for(int i=0;i<vertices.size();i++)
+		for(unsigned int i=0;i<vertices.size();i++)
 		{
 			memcpy( vbData + infoarr.offsetBuffer + i*infoarr.chunkSize, ((char*)&vertices[i]) + infoarr.offsetObject, infoarr.nameitSize );
 		}
@@ -285,5 +285,12 @@ int JMesh::resetSubData(JVERTEXATTRIBUTE att, unsigned int idx, void* data)
 
 	memcpy(vbData+infoarr.offsetBuffer + idx*infoarr.chunkSize,data,infoarr.chunkSize);
 
+	return 0;
+}
+
+int JMesh::zeroMemorySubDataAttribute(JVERTEXATTRIBUTE att)
+{
+	JVertexAttributeInfo& infoarr = *JVertex::getFixedVertexAttributeInfoArray(att,vertices.size());
+	memset(vbData+infoarr.offsetBuffer,0,infoarr.chunkSize*vertices.size());
 	return 0;
 }

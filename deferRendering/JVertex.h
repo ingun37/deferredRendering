@@ -13,6 +13,7 @@ typedef struct JVertexAttributeInfoRaw
 	int stride;
 }JVertexAttributeInfo;
 
+#define JVERTEXSKINMATNUM 3
 enum JVERTEXATTRIBUTE
 {
 	JVERTEXATTPOSITION,
@@ -46,10 +47,12 @@ const int tableElementSize[JVERTEXATTNUM]   = {
 };
 const int tableElementNum[JVERTEXATTNUM]    = { 3, 3, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
 const int tableNormalize[JVERTEXATTNUM]     = { 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-const int tableMatrixRowLen[JVERTEXATTNUM]  = { 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4};
-const int tableMatrixRowNum[JVERTEXATTNUM]  = {-1,-1,-1,-1, 0, 1, 2, 3, 0, 1, 2, 3, 0, 1, 2, 3};
-
-
+const int tableZeroMemory[JVERTEXATTNUM]	= { 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+const int tableNthSkinMatAttribute[JVERTEXSKINMATNUM][4] = {
+	{JVERTEXATTSKINMAT1_R1, JVERTEXATTSKINMAT1_R2, JVERTEXATTSKINMAT1_R3, JVERTEXATTSKINMAT1_R4},
+	{JVERTEXATTSKINMAT2_R1, JVERTEXATTSKINMAT2_R2, JVERTEXATTSKINMAT2_R3, JVERTEXATTSKINMAT2_R4},
+	{JVERTEXATTSKINMAT3_R1, JVERTEXATTSKINMAT3_R2, JVERTEXATTSKINMAT3_R3, JVERTEXATTSKINMAT3_R4},
+};
 
 
 class JVertex
@@ -65,7 +68,7 @@ public:
 	float skinmat3[16];
 
 	//fixit : gl type is fixed to float. fixit
-	static JVertexAttributeInfo* getFixedVertexAttributeInfoArray(int i, unsigned int vNum)
+	static JVertexAttributeInfo* getFixedVertexAttributeInfoArray(int atti, unsigned int vNum)
 	{
 		static JVertexAttributeInfo fixedparameters[JVERTEXATTNUM];
 		static int inited = 0;
@@ -83,19 +86,10 @@ public:
 				fixedparameters[i].offsetObject = offsetInObj;
 				
 				offsetInObj += tableElementNum[i]*tableElementSize[i];
-
-//				if( tableMatrixRowLen[i] )
-//				{
-//					fixedparameters[i].offsetBuffer = 0;
-//					fixedparameters[i].stride = tableElementSize[i]*tableMatrixRowLen[i]*tableMatrixRowLen[i];
-//					fixedparameters[i].chunkSize = fixedparameters[i].stride;
-//				}
-//				else
-				{
-					fixedparameters[i].offsetBuffer = 0;
-					fixedparameters[i].stride = 0;
-					fixedparameters[i].chunkSize = tableElementSize[i] * tableElementNum[i];
-				}
+				
+				fixedparameters[i].offsetBuffer = 0;
+				fixedparameters[i].stride = 0;
+				fixedparameters[i].chunkSize = tableElementSize[i] * tableElementNum[i];
 			}
 			inited = 1;
 		}
@@ -103,23 +97,13 @@ public:
 		unsigned int accuOffset = 0;
 		for(int i=0;i<JVERTEXATTNUM;i++)
 		{
-//			if( tableMatrixRowLen[i] )
-//			{
-//				fixedparameters[i].offsetBuffer = accuOffset;
-//				fixedparameters[i].offsetFirst = accuOffset + tableMatrixRowNum[i] * fixedparameters[i].nameitSize;
-//				if(tableMatrixRowNum[i]+1==tableMatrixRowLen[i])
-//					accuOffset+= tableMatrixRowLen[i]*tableMatrixRowLen[i]*tableElementSize[i]*vNum;
-//			}
-//			else
-			{
-				fixedparameters[i].offsetBuffer = accuOffset;
-				fixedparameters[i].offsetFirst = accuOffset;
-				accuOffset += tableElementNum[i] * tableElementSize[i] * vNum;
-			}
+			fixedparameters[i].offsetBuffer = accuOffset;
+			fixedparameters[i].offsetFirst = accuOffset;
+			accuOffset += tableElementNum[i] * tableElementSize[i] * vNum;
 		}
 
-		if(i >= 0 && i<JVERTEXATTNUM)
-			return &(fixedparameters[i]);
+		if(atti >= 0 && atti<JVERTEXATTNUM)
+			return &(fixedparameters[atti]);
 		return 0;
 	}
 

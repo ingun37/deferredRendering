@@ -22,11 +22,14 @@ out VS_OUT
 
 void main(void)
 {
-	gl_Position = mvp * transpose(skinmat1) * vec4(position,1);
-	//gl_Position = mvp * vec4(position,1);
-	//vs_out.color = vec4(skinmat1[1].xyz,1);
+	vec4 worldpos = (
+		(transpose(skinmat1) * vec4(position,1))+
+		(transpose(skinmat2) * vec4(position,1))+
+		(transpose(skinmat3) * vec4(position,1))
+	);
+	gl_Position = mvp * worldpos;
 	vs_out.color = diffuse;
-	vs_out.position = (trans * transpose(skinmat1) * vec4(position,1)).xyz;
+	vs_out.position = (trans * worldpos).xyz;
 	//vs_out.position = (trans * vec4(position,1)).xyz;
 	vs_out.normal = normal;
 	vs_out.uv = uv;
