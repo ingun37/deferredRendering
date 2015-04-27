@@ -331,106 +331,31 @@ int JFrameBufferObject::reset( int jfbo_brushes, GLsizei aWidth, GLsizei aHeight
 	try
 	{
 		brushes = jfbo_brushes;
-		if( (jfbo_brushes & BRUSH_DIFFUSE) )
+		for(int i=0;i<BRUSHIDX_NUM;i++)
 		{
-			if( colorTex.bufID == -1 || colorTex.width != aWidth || colorTex.height != aHeight )
-			{
-				mngTex->deleteTexture( colorTex );
-				if( mngTex->makeTexture( colorTex, aWidth, aHeight, JTEXTUREKIND_COLOR ) != 0 )
-					throw;
-			}
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTex.bufID, 0);
-		}
-		else if( !(jfbo_brushes & BRUSH_DIFFUSE) )
-		{
-			mngTex->deleteTexture( colorTex );
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
-		}
+			int glAttachment = tableBrush_attachIdx[i];
+			if(tableBrush_kind[i] == JTEXTUREKIND_COLOR || tableBrush_kind[i] == JTEXTUREKIND_VECTOR)
+				glAttachment+=GL_COLOR_ATTACHMENT0;
+			else if(tableBrush_kind[i] == JTEXTUREKIND_DEPTH)
+				glAttachment += GL_DEPTH_ATTACHMENT;
+			else if(tableBrush_kind[i] == JTEXTUREKIND_STENCIL)
+				glAttachment += GL_STENCIL_ATTACHMENT;
 
-		if( (jfbo_brushes & BRUSH_POSITION) )
-		{
-			if( positionTex.bufID == -1 || positionTex.width != aWidth || positionTex.height != aHeight )
+			if( (jfbo_brushes & tableBrush_flag[i]) )
 			{
-				mngTex->deleteTexture( positionTex );
-				if(mngTex->makeTexture( positionTex, aWidth, aHeight, JTEXTUREKIND_VECTOR ) != 0)
-					throw;
+				if( texs[i].bufID == -1 || texs[i].width != aWidth || texs[i].height != aHeight )
+				{
+					mngTex->deleteTexture( texs[i] );
+					if( mngTex->makeTexture( texs[i], aWidth, aHeight, tableBrush_kind[i] ) != 0 )
+						throw;
+				}
+				glFramebufferTexture2D(GL_FRAMEBUFFER, glAttachment, GL_TEXTURE_2D, texs[i].bufID, 0);
 			}
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, positionTex.bufID, 0);
-		}
-		else if( !(jfbo_brushes & BRUSH_POSITION) )
-		{
-			mngTex->deleteTexture( positionTex );
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, 0, 0);
-		}
-
-		if( (jfbo_brushes & BRUSH_NORMAL) )
-		{
-			if( normalTex.bufID == -1 || normalTex.width != aWidth || normalTex.height != aHeight )
+			else if( !(jfbo_brushes & tableBrush_flag[i]) )
 			{
-				mngTex->deleteTexture( normalTex );
-				if(mngTex->makeTexture( normalTex, aWidth, aHeight, JTEXTUREKIND_VECTOR ) != 0)
-					throw;
+				mngTex->deleteTexture( texs[i] );
+				glFramebufferTexture2D(GL_FRAMEBUFFER, glAttachment, GL_TEXTURE_2D, 0, 0);
 			}
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, normalTex.bufID, 0);
-		}
-		else if( !(jfbo_brushes & BRUSH_NORMAL) )
-		{
-			mngTex->deleteTexture( normalTex );
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, 0, 0);
-		}
-		//----------------------------------------------------
-		if( (jfbo_brushes & BRUSH_TEX) )
-		{
-			if( texTex.bufID == -1 || texTex.width != aWidth || texTex.height != aHeight )
-			{
-				mngTex->deleteTexture( texTex );
-				if( mngTex->makeTexture( texTex, aWidth, aHeight, JTEXTUREKIND_COLOR ) != 0)
-					throw;
-			}
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, texTex.bufID, 0);
-		}
-		else if( !(jfbo_brushes & BRUSH_TEX) )
-		{
-			mngTex->deleteTexture( texTex );
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, 0, 0);
-		}
-		//----------------------------------------------------
-		if( (jfbo_brushes & BRUSH_SHADOW) )
-		{
-			if( shadowTex.bufID == -1 || shadowTex.width != aWidth || shadowTex.height != aHeight )
-			{
-				mngTex->deleteTexture( shadowTex );
-				if(mngTex->makeTexture( shadowTex, aWidth, aHeight, JTEXTUREKIND_COLOR ) != 0)
-					throw;
-			}
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, shadowTex.bufID, 0);
-		}
-		else if( !(jfbo_brushes & BRUSH_SHADOW) )
-		{
-			mngTex->deleteTexture( shadowTex );
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, 0, 0);
-		}
-		if( (jfbo_brushes & BRUSH_DEPTH) )
-		{
-			if( depthTex.bufID == -1 || depthTex.width != aWidth || depthTex.height != aHeight )
-			{
-				mngTex->deleteTexture( depthTex );
-				if(mngTex->makeTexture( depthTex, aWidth, aHeight, JTEXTUREKIND_DEPTH )!=0)
-					throw;
-			}
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTex.bufID, 0);
-			/*glGenRenderbuffers(1, &depthRBO);
-			glBindRenderbuffer(GL_RENDERBUFFER, depthRBO);
-			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, aWidth, aHeight);
-			glBindRenderbuffer(GL_RENDERBUFFER, 0);
-			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRBO);*/
-		}
-		else if( !(jfbo_brushes & BRUSH_DEPTH) )
-		{
-			mngTex->deleteTexture( depthTex );
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, 0, 0);
-			/*glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, 0);
-			depthRBO = 0;*/
 		}
 	/*
 		The width and height of framebuffer-attachable image must be not zero.
@@ -487,33 +412,17 @@ int JFrameBufferObject::setOutputDrawBuffer()
 
 	int attachmentCnt = 0;
 
-
+	for(int i=0;i<BRUSHIDX_NUM;i++)
+	{
+		if( tableBrush_kind[i] == JTEXTUREKIND_COLOR || tableBrush_kind[i] == JTEXTUREKIND_VECTOR )
+		{
+			if(brushes & tableBrush_flag[i])
+			{
+				drawBuffers[attachmentCnt++] = GL_COLOR_ATTACHMENT0 + tableBrush_attachIdx[i];
+			}
+		}
+	}
 	
-	if( brushes & JFBO_BRUSHES::BRUSH_DIFFUSE)
-	{
-		drawBuffers[attachmentCnt] = GL_COLOR_ATTACHMENT0;
-		attachmentCnt++;
-	}
-	if( brushes & JFBO_BRUSHES::BRUSH_POSITION)
-	{
-		drawBuffers[attachmentCnt] = GL_COLOR_ATTACHMENT1;
-		attachmentCnt++;
-	}
-	if( brushes & JFBO_BRUSHES::BRUSH_NORMAL)
-	{
-		drawBuffers[attachmentCnt] = GL_COLOR_ATTACHMENT2;
-		attachmentCnt++;
-	}
-	if( brushes & JFBO_BRUSHES::BRUSH_TEX)
-	{
-		drawBuffers[attachmentCnt] = GL_COLOR_ATTACHMENT3;
-		attachmentCnt++;
-	}
-	if( brushes & JFBO_BRUSHES::BRUSH_SHADOW)
-	{
-		drawBuffers[attachmentCnt] = GL_COLOR_ATTACHMENT4;
-		attachmentCnt++;
-	}
 	/*NO!!! dont use depth componenent as output drawbuffer
 	if( brushes & JFBO_BRUSHES::BRUSH_DEPTH)
 	{
@@ -531,26 +440,10 @@ int JFrameBufferObject::setOutputDrawBuffer()
 
 JTextureObject* JFrameBufferObject::getTextureObjectOfCanvas( JFBO_BRUSHES whichTex )
 {
-	switch(whichTex)
+	for(int i=0;i<BRUSHIDX_NUM;i++)
 	{
-	case BRUSH_DIFFUSE:
-		return colorTex.bufID==-1 ? NULL : &colorTex;
-		break;
-	case BRUSH_DEPTH:
-		return depthTex.bufID==-1 ? NULL : &depthTex;
-		break;
-	case BRUSH_POSITION:
-		return positionTex.bufID==-1 ? NULL : &positionTex;
-		break;
-	case BRUSH_NORMAL:
-		return normalTex.bufID==-1 ? NULL : &normalTex;
-		break;
-	case BRUSH_TEX:
-		return texTex.bufID==-1 ? NULL : &texTex;
-		break;
-	case BRUSH_SHADOW:
-		return shadowTex.bufID==-1 ? NULL : &shadowTex;
-		break;
+		if(tableBrush_flag[i] == whichTex)
+			return texs[i].bufID==-1 ? NULL : &texs[i];
 	}
 	return NULL;
 }

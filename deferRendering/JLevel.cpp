@@ -114,7 +114,7 @@ int JLevel::draw()
 
 						break;
 					case JSHADERKIND_DEFERRED:
-						mngProg->setUniformVariables_Deferred( mP * mV * mM, material->texObj, shadowPV, shadowFBO?&(shadowFBO->depthTex) : NULL, mM );
+						mngProg->setUniformVariables_Deferred( mP * mV * mM, material->texObj, shadowPV, shadowFBO? shadowFBO->getTextureObjectOfCanvas(BRUSH_DEPTH) : NULL, mM );
 						break;
 					default:
 						uniformVariableSetsuccess = false;
